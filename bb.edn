@@ -1,0 +1,4 @@
+{:paths ["src" "test" "../root/20-actors/etzhayyim-organism/src"]
+ :tasks
+ {test {:doc "Run the governor contract test suite"
+        :task (shell "bb" "run_tests.clj")}}}

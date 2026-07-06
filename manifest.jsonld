@@ -1,0 +1,38 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    "https://etzhayyim.com/ns/actor-manifest"
+  ],
+  "@type": "ActorManifest",
+  "id": "did:web:etzhayyim.com:actor:tomoshibi",
+  "name": "tomoshibi",
+  "displayName": "灯 — Invitational Evangelism Publication Actor",
+  "displayNameJa": "灯",
+  "displayNameEn": "Tomoshibi",
+  "description": "Non-profit religious-corp actor proposing and gating invitational content (Mission Charter §1.16, Active Evangelism Doctrine). EvangelismGovernor (independent censor) calls etzhayyim_organism.sensors.evangelism-gate directly — a genuine wiring, not an illustrative placeholder — closing ADR-2607061700 Open Question 4. R0: governor only; no StateGraph orchestration, no organizer/advisor LLM, no publisher/app-aozora wiring, no self-sovereign identity yet (see MATURITY.md).",
+  "descriptionJa": "招待型コンテンツを提案・検閲する actor(Mission Charter §1.16, 能動的伝道 doctrine)。EvangelismGovernor が etzhayyim_organism.sensors.evangelism-gate を直接呼び出す(illustrative placeholder ではない実配線)。R0: governor のみ、StateGraph/organizer/publisher/自己主権 identity は未着手。",
+  "tier": "Tier-B",
+  "parentActor": null,
+  "firstTouchChannelInvariant": "NOT YET LIVE (R0) — future app-aozora com.atproto.repo.createRecord, distinct lexicon from evangelismActivityAttestation (the ledger).",
+  "lexicons": ["com.etzhayyim.apps.etzhayyim.evangelismActivityAttestation"],
+  "adr": {
+    "master": "etzhayyim-root:adr:2607061700",
+    "openQuestion": 4
+  },
+  "crossActor": {
+    "kouhou": "domain-mismatched (external public-sector info curation) — considered and rejected as a host",
+    "kataribe": "domain-tension (G6 doctrinalMonopolyAttested const false) — considered and rejected as a host",
+    "tashikame": "domain-mismatched (fact-check neutrality) — considered and rejected as a host",
+    "yomi": "domain-mismatched (news digest) — considered and rejected as a host"
+  },
+  "scope": {
+    "phase": "R0 scaffold — governor genuinely wired to evangelism-gate; no runtime orchestration",
+    "scopeBoundary": "digital invitational-content gating only; interpersonal evangelism is a human Adherent's own practice, out of scope for any actor",
+    "exclusions": ["individual-vulnerability targeting", "coercion", "minor-solo solicitation", "content with no opt-out affordance", "actuation", "per-post operator/Council prior restraint (autonomous by default, once a publisher exists)"]
+  },
+  "constitutionalDiscipline": {
+    "evangelismGate": "ADR-2607061700 §1.16(a)-(d) — etzhayyim_organism.sensors.evangelism-gate/gate, composed with charter_rider §2 catastrophe-veto scan",
+    "autonomousPublication": "ADR-2606281500 (種をまく) narrow carve-out — no per-post prior restraint once a publisher exists; off-switch = revocable member CACAO leash (not yet implemented)",
+    "aggregateFirst": "never a target-list (ADR-2606281500 rule 4) — no recipient-identifying data anywhere in this actor"
+  }
+}

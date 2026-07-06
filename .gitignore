@@ -1,0 +1,6 @@
+.cpcache/
+.nrepl-port
+/target
+/classes
+# the actor's own future Ed25519 identity — never commit a private key
+.tomoshibi/
