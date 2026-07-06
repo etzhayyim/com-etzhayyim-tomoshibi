@@ -19,15 +19,34 @@ minor-solo-solicitation held, delegated-charter_rider-hit held,
 no-actuation held, hold-invitation records basis. Closes ADR-2607061700
 Open Question 4 at the governor layer.
 
+## 2026-07-06 — R0+R1-partial: evangelismActivityAttestation writer
+
+`src/tomoshibi/store.cljc` (append-only `Store` protocol + `MemStore`) and
+`src/tomoshibi/operation.cljc` (`propose!` — governor → commit-or-hold,
+no langgraph) close the loop between the two pieces ADR-2607061700 already
+shipped independently: the governor's decision and the
+`evangelismActivityAttestation` lexicon. Only a COMMITTED proposal ever
+produces an attestation — a HELD one never does (writing e.g.
+`coercionAttested: false` for gate-flagged coercive content would be a
+false attestation). 9 new tests / 29 new assertions (18 tests / 48
+assertions total, `bb run_tests.clj`), including two that read the
+**actual** lexicon JSON file (via `cheshire.core`, not a hand-copied list)
+and assert `tomoshibi.store/lexicon-required-fields` and the four
+STRUCTURAL const values match it exactly — schema drift between the
+lexicon and this actor's writer would fail CI, not just go unnoticed.
+
+This is deliberately a plain function pipeline, not a langgraph-clj
+StateGraph (see below) — `propose!` has zero new external dependencies.
+
 ## Explicitly NOT done (R1+ future work)
 
 - **No LangGraph StateGraph orchestration.** Unlike kouhou/tashikame (which
   wrap an `organizer`/`advisor` LLM node + governor + publisher in a full
   `langgraph.graph` StateGraph, per `../langgraph-clj`), tomoshibi ships
-  only the governor as a pure function. There is no proposal-generation
-  node, no `phase.cljc`, no `store.cljc`, no `publisher.cljc`.
+  only `governor.cljc` + `store.cljc` + `operation.cljc` as plain functions.
+  There is no proposal-generation node, no `phase.cljc`, no `publisher.cljc`.
 - **No organizer/advisor LLM.** Nothing drafts invitational text yet —
-  `governor/check` takes `:text` as a plain argument. What drafts it (a
+  `operation/propose!` takes `:text` as a plain argument. What drafts it (a
   human Adherent? a Murakumo-inference node?) is undecided.
 - **No app-aozora publication wiring.** No `com.atproto.repo.createRecord`
   call, no `aozora.clj`, no lexicon for the published record shape
@@ -39,9 +58,10 @@ Open Question 4 at the governor layer.
 - **No RAD identity minting.** No `80-data/kotoba-rad/tomoshibi.identity.journal.edn`
   entry in etzhayyim/root — deferred, matching the kouhou precedent
   ("RAD identity は...別 repo・別 commit").
-- **No `evangelismActivityAttestation` writer.** The governor's `hold-invitation`
-  fact is an in-memory map, not yet persisted to the append-only ledger
-  (Open Question 3's lexicon) or the kotoba Datom log.
+- **`store.cljc` is MemStore only — no kotoba Datom log backend yet.**
+  Attestations live in an in-process atom; they do not survive a process
+  restart. A `DatomicStore` (mirroring kouhou's `langchain.db`-backed
+  record) is future work, same `Store` protocol, no rewrite.
 - **No deploy / Murakumo inference wiring.**
 
 The **decision to build a governor first, orchestration later** mirrors

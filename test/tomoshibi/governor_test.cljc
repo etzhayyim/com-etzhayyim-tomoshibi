@@ -1,12 +1,11 @@
-#!/usr/bin/env bb
 ;; The invitational-content publication contract as executable tests.
 ;; Invariant: tomoshibi NEVER publishes an invitation the EvangelismGovernor
 ;; rejects; every published invitation is aggregate-first, opt-out-able,
 ;; non-coercive, and never solicits a minor alone (ADR-2607061700 §1.16).
-;; Run: bb --classpath src:test:../root/20-actors/etzhayyim-organism/src \
-;;         test/tomoshibi/governor_test.cljc
+;; Run via run_tests.clj (bb run_tests.clj) — this ns has no standalone
+;; -main; it is aggregated by the shared runner (kouhou/tashikame convention).
 (ns tomoshibi.governor-test
-  (:require [clojure.test :refer [deftest is testing run-tests]]
+  (:require [clojure.test :refer [deftest is testing]]
             [tomoshibi.governor :as gov]))
 
 (defn- check [text opts]
@@ -73,9 +72,3 @@
           fact (gov/hold-invitation {:op :invitation/propose} {:actor-id "tomoshibi"} v)]
       (is (= :hold (:disposition fact)))
       (is (some #{:evangelism-gate-hit} (:basis fact))))))
-
-(defn -main [& _]
-  (let [{:keys [fail error]} (run-tests 'tomoshibi.governor-test)]
-    (System/exit (if (= 0 (+ fail error)) 0 1))))
-
-(-main)

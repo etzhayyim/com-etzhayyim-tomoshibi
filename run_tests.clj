@@ -4,10 +4,11 @@
   `bb run_tests.clj` (bb.edn wires the classpath, including the sibling
   etzhayyim/root sensors checkout)."
   (:require [clojure.test :refer [run-tests]]
-            [tomoshibi.governor-test]))
+            [tomoshibi.governor-test]
+            [tomoshibi.operation-test]))
 
 (defn -main [& _args]
-  (let [res (run-tests 'tomoshibi.governor-test)]
+  (let [res (run-tests 'tomoshibi.governor-test 'tomoshibi.operation-test)]
     (when (pos? (+ (:fail res 0) (:error res 0)))
       (System/exit 1))))
 

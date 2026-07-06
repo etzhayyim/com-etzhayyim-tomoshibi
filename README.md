@@ -63,6 +63,30 @@ NOT an external operator/Council prior restraint — it is tomoshibi's own
 seed rail; the off-switch is the revocable member CACAO leash (future work,
 see MATURITY.md), not a per-post approval.
 
+## EvangelismActivityAttestation writer (`src/tomoshibi/store.cljc` + `src/tomoshibi/operation.cljc`)
+
+`operation/propose!` ties the governor to an append-only `Store`
+(`MemStore` for R0): only a **committed** proposal ever writes an
+`evangelismActivityAttestation` (Open Question 3's lexicon) — a held one
+never does, since attesting e.g. `coercionAttested: false` for
+gate-flagged coercive content would be a false record, not merely an
+incomplete one.
+
+```clojure
+(require '[tomoshibi.operation :as op] '[tomoshibi.store :as store])
+(def s (store/seed-db))
+(op/propose! s nil {:actor-id "tomoshibi"}
+             {:effect :assessment :text "We're gathering..." :opt-out-present? true
+              :mode "digital" :actor-did "did:web:etzhayyim.com:actor:tomoshibi"}
+             "2026-07-06T09:00:00Z" "did:web:etzhayyim.com:actor:tomoshibi")
+;; => {:disposition :commit :verdict {...} :attestation {...}}
+(store/all-attestations s) ;; => [{...}]
+```
+
+No LangGraph StateGraph is involved — this is a plain function pipeline,
+zero new external dependencies. See MATURITY.md for what a full
+`operation` (organizer LLM + StateGraph + publisher, mirroring kouhou) would add.
+
 ## Run tests
 
 ```bash
@@ -71,10 +95,14 @@ bb run_tests.clj
 bb --classpath "src:test:../root/20-actors/etzhayyim-organism/src" run_tests.clj
 ```
 
-9 tests / 19 assertions, all green — covers clean-invitation-commits,
-missing-opt-out / individual-targeting / coercion / minor-solo-solicitation
-/ delegated-charter-rider-hit all HOLD, no-actuation HOLD, and hold-fact
-audit recording.
+18 tests / 48 assertions, all green — governor coverage (clean-invitation
+commits, missing-opt-out / individual-targeting / coercion /
+minor-solo-solicitation / delegated-charter-rider-hit all HOLD,
+no-actuation HOLD, hold-fact audit recording) plus operation/store coverage
+(commit writes an attestation with all four STRUCTURAL consts pinned, hold
+writes nothing, append-only accumulation, interpersonal vs. digital mode
+fields, and two tests that read the **actual** lexicon JSON and assert
+this actor's required-fields/const-values match it exactly).
 
 ## Related
 
