@@ -25,13 +25,21 @@ target-list (ADR-2606281500 rule 4).
 - `.cljc` for anything portable — `governor.cljc` (the HARD gate),
   `store.cljc` (append-only `Store` protocol + `MemStore`),
   `operation.cljc` (`propose!` — governor → commit-or-hold, no langgraph).
+  `.clj` only for JVM-only I/O — `cacao.clj` (self-sovereign Ed25519
+  identity; faithful port of `kouhou.cacao`, `KeyPairGenerator "Ed25519"`
+  needs a real JDK, confirmed not resolvable the same way from bb's SCI).
 - `bb.edn` adds `../root/20-actors/etzhayyim-organism/src` as an extra
   classpath entry — this actor depends on that sibling checkout being
   present at the expected relative path (west-managed monorepo layout,
   same pattern as kouhou's `:local/root "../../com-junkawasaki/langgraph-clj"`).
-- No private key exists yet (no self-sovereign identity — see MATURITY.md).
-- `bb run_tests.clj` for tests (18 tests / 48 assertions). No clj-kondo
-  lint config yet beyond the placeholder `:lint` alias.
+- The actor's own Ed25519 identity lives in `.tomoshibi/identity.edn`
+  (gitignored) — NEVER commit a private key. Generated on first
+  `tomoshibi.cacao/load-or-create-identity!` call.
+- `bb run_tests.clj` for the bb-based suite (18 tests / 48 assertions —
+  governor + store/operation, `.cljc` only). `clojure -M -m cacao-smoke`
+  for the JVM-only cacao smoke script (no automated `clojure.test` for
+  cacao, matching kouhou/tashikame — see MATURITY.md). No clj-kondo lint
+  config yet beyond the placeholder `:lint` alias.
 - Test files (`test/tomoshibi/*_test.cljc`) do NOT call `-main`/`System/exit`
   themselves — only `run_tests.clj` does. A per-file eager `(-main)` would
   `System/exit` before the next namespace in a shared runner ever loads

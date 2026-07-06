@@ -1,6 +1,6 @@
-{:paths ["src"]
+{:paths ["src" "scripts"]
  :deps {org.clojure/clojure {:mvn/version "1.12.0"}
         cheshire/cheshire {:mvn/version "5.13.0"}} ; test-only: lexicon-schema cross-check (bb bundles this built-in; declared here for clojure-CLI parity)
  :aliases
  {:lint {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2024.11.14"}}
-         :main-opts    ["-m" "clj-kondo.main" "--lint" "src" "test" "--fail-level" "error"]}}}
+         :main-opts    ["-m" "clj-kondo.main" "--lint" "src" "test" "scripts" "--fail-level" "error"]}}}

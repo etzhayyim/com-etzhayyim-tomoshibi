@@ -87,6 +87,26 @@ No LangGraph StateGraph is involved — this is a plain function pipeline,
 zero new external dependencies. See MATURITY.md for what a full
 `operation` (organizer LLM + StateGraph + publisher, mirroring kouhou) would add.
 
+## Self-sovereign identity (`src/tomoshibi/cacao.clj`)
+
+Faithful port of `kouhou.cacao` (JVM-only — `KeyPairGenerator/getInstance
+"Ed25519"` needs a real JDK crypto provider). `load-or-create-identity!`
+generates + persists this actor's own Ed25519 key to
+`.tomoshibi/identity.edn` (gitignored) on first run; `mint` produces a
+depth-1 self-minted CACAO (SIWE/EIP-4361, Ed25519-signed, CBOR-wire,
+base64) for a future aozora publish call to carry.
+
+No `clojure.test` suite (matching the kouhou/tashikame precedent — neither
+ships one for cacao either); verified by a manual smoke script instead:
+
+```bash
+clojure -M -m cacao-smoke
+```
+
+Checks a well-formed `did:key:z...`, byte-identical reload, a non-empty
+minted CACAO, `verify?` accepting the actor's own signature, and
+`verify?` **rejecting** that signature under a different actor's key.
+
 ## Run tests
 
 ```bash

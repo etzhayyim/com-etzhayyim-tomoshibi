@@ -38,6 +38,32 @@ lexicon and this actor's writer would fail CI, not just go unnoticed.
 This is deliberately a plain function pipeline, not a langgraph-clj
 StateGraph (see below) — `propose!` has zero new external dependencies.
 
+## 2026-07-06 — self-sovereign Ed25519 identity (`tomoshibi.cacao`)
+
+Faithful port of `kouhou.cacao` (itself ported from `tsumugu.cacao` /
+`tashikame.cacao` — the "keep in sync" family; NOT reimplemented from
+scratch, to avoid introducing a subtle crypto bug in a proven, byte-exact
+CBOR/SIWE/did:key implementation). `.clj` (not `.cljc`) — JVM-only, matching
+kouhou's own convention: `KeyPairGenerator/getInstance "Ed25519"` needs a
+JDK 15+ provider not resolvable from bb's SCI environment for the full
+Signature/KeyFactory round-trip (confirmed by testing, not assumed).
+
+`load-or-create-identity!` generates + persists a fresh Ed25519 key to
+`.tomoshibi/identity.edn` (gitignored) on first run, or reloads it
+byte-identically thereafter. `mint` produces a depth-1 self-minted CACAO
+(SIWE/EIP-4361 message, Ed25519-signed, minimal-CBOR-wire-encoded,
+base64). No automated `clojure.test` suite for this module — matching the
+kouhou/tashikame precedent (neither ships a `cacao_test.clj` either);
+verified instead by `scripts/cacao_smoke.clj` (`clojure -M -m cacao-smoke`),
+which checks: a well-formed `did:key:z...`, byte-identical reload, a
+non-empty minted CACAO, `verify?` accepting the actor's own signature, and
+— the negative case — `verify?` rejecting that same signature under a
+**different** actor's public key. All 5 checks pass.
+
+Not yet used by anything — `operation/propose!` does not mint a CACAO for
+committed proposals yet (that's the aozora publisher's job, still absent;
+see below).
+
 ## Explicitly NOT done (R1+ future work)
 
 - **No LangGraph StateGraph orchestration.** Unlike kouhou/tashikame (which
@@ -51,10 +77,18 @@ StateGraph (see below) — `propose!` has zero new external dependencies.
 - **No app-aozora publication wiring.** No `com.atproto.repo.createRecord`
   call, no `aozora.clj`, no lexicon for the published record shape
   (distinct from `evangelismActivityAttestation`, which is the *ledger*,
-  not the *public post* record).
-- **No self-sovereign identity / CACAO leash.** No `.tomoshibi/identity.edn`,
-  no `cacao.clj`. `did.json` in `.well-known/` is a static placeholder,
-  not resolvable — `did:web:etzhayyim.com:actor:tomoshibi` is not live.
+  not the *public post* record). `tomoshibi.cacao/mint` exists but nothing
+  calls it yet — the publisher is what would.
+- **No revocable CACAO leash wiring.** The identity/mint primitives exist;
+  the *leash* (a member-held revocation reference carried on each publish
+  call, per ADR-2606111400) does not — there is no publish call yet for it
+  to be carried on.
+- **`did:web:etzhayyim.com:actor:tomoshibi` is still not live.** `did.json`
+  in `.well-known/` remains a static placeholder; the `did:key` this actor
+  now genuinely generates is a *different* DID method from the `did:web`
+  the manifest advertises (this mirrors kouhou/tashikame's own two-DID
+  shape — did:key = actor's own signing identity; did:web = the
+  human-facing discovery address once hosted).
 - **No RAD identity minting.** No `80-data/kotoba-rad/tomoshibi.identity.journal.edn`
   entry in etzhayyim/root — deferred, matching the kouhou precedent
   ("RAD identity は...別 repo・別 commit").

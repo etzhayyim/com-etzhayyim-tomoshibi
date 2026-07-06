@@ -2,5 +2,6 @@
 .nrepl-port
 /target
 /classes
-# the actor's own future Ed25519 identity — never commit a private key
+# the actor's own Ed25519 identity (tomoshibi.cacao/load-or-create-identity!)
+# — never commit a private key
 .tomoshibi/
