@@ -5,7 +5,25 @@ tomoshibi (灯) — invitational evangelism digital-publication actor. See
 for the pattern this follows (containment + independent governor +
 append-only ledger). Parent decision record:
 `../root/90-docs/adr/2607061700-etzhayyim-active-evangelism-doctrine.md`
-(Open Question 4). Design 正本: `docs/adr/0001-architecture.md`.
+(Open Question 4). Design 正本: `docs/adr/0001-architecture.md` (R0 core) +
+`docs/adr/0002-mail-capability-and-murakumo-residency.md` (R1 email channel
++ resident agent; doctrine boundary in root ADR-2607121830).
+
+## R1: the email channel (reply-only) + resident agent
+
+`tomoshibi@etzhayyim.com` receives via Cloudflare Email Routing → the
+`infra/mail-worker/` Worker stages into KV; the resident agent
+(`tomoshibi.daemon`, launchd on murakumo node zebulun, healthz
+127.0.0.1:13094) pulls, drafts via node-local Ollama
+(`tomoshibi.organizer`, Murakumo allowlist only), gates EVERY outgoing text
+through the EvangelismGovernor, and sends committed replies via Resend.
+Outbound is REPLY-ONLY BY CONSTRUCTION: `tomoshibi.mail/reply-message` is
+the sole send constructor and requires an inbound record — cold outreach is
+unrepresentable, not merely prohibited. Attestation happens ONLY after a
+confirmed send. Stop requests (配信停止/unsubscribe/…) suppress the sender
+forever. The leash file (`~/.etzhayyim/tomoshibi/leash.edn`) is fail-closed
+and checked every tick; outer kill switches: disable the routing rule, or
+`sudo launchctl bootout system/com.etzhayyim.tomoshibi.agent`.
 
 ## Invariant
 

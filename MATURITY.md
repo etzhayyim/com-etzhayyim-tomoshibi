@@ -2,8 +2,8 @@
 
 honest framing: できていないことは「未」と明記する。
 
-- Actor: `did:web:etzhayyim.com:actor:tomoshibi` (placeholder, not live-hosted) · ADR-2607061700 (parent) · **R0 scaffold**
-- 不変条件(全イテレーション厳守): 対人ではなく digital 招待発信のみを扱う(対人伝道は信者個人の実践であり本 actor の対象外) · governor 拒否のコンテンツは決して publish しない · aggregate-first(集合的発信のみ) · opt-out 常時提供 · coercion / 未成年単独勧誘は構造的に不可能 · コミットはユーザー明示時のみ
+- Actor: `did:web:etzhayyim.com:actor:tomoshibi` (placeholder, not live-hosted) · ADR-2607061700 (parent) · **R1: email channel + murakumo residency**
+- 不変条件(全イテレーション厳守): 対人ではなく digital 招待発信のみを扱う(対人伝道は信者個人の実践であり本 actor の対象外) · governor 拒否のコンテンツは決して publish しない · aggregate-first — actor 起点の発信は集合的発信のみ。**email は reply-only の narrow 追加**(2026-07-12 founder 指示 + root ADR-2607121830): 受信起点の応答だけを許し、actor 起点の cold outreach は API 上表現不能に保つ · opt-out 常時提供(email では全返信に footer + List-Unsubscribe + suppression 永続) · coercion / 未成年単独勧誘は構造的に不可能 · コミットはユーザー明示時のみ
 
 ## 2026-07-06 — R0: EvangelismGovernor genuinely wired
 
@@ -103,3 +103,51 @@ this corpus's own convention (e.g. kataribe's R0: "cell 非実行, import時
 RuntimeError" — many R0 scaffolds ship structural gates + tests before
 runtime wiring). The governor is the load-bearing contract; everything
 above it is replaceable plumbing.
+
+## 2026-07-12 — R1: email send/receive + autonomous murakumo residency
+
+Founder session directive (2026-07-12): 「メールアドレスの送受信の capability を
+持つように, murakumo で自律的永続的に ai agent が動くようにして」。設計正本:
+`docs/adr/0002-mail-capability-and-murakumo-residency.md` + root
+ADR-2607121830(doctrine 境界)。
+
+New: `mail.cljc`(pure builders — worker pull / reply-only construction /
+Resend wire + threading headers)· `suppress.cljc`(JA/EN stop-request 検出 +
+append-only suppression journal)· `organizer.cljc`(node-local Ollama
+gemma4:12b-it-qat、Murakumo allowlist、fail-closed)· `leash.cljc`(fail-closed
+leash file — この actor family で初の「実際に実行を止める」leash 配線)·
+`journal.cljc`(FileStore = Store protocol の durable 実装 + processed/budget
+journals)· `agent.cljc`(1 bounded tick、全 effect 注入)· `daemon.clj`(bb
+常駐 entrypoint、healthz 127.0.0.1:13094)· `infra/mail-worker/`(CF Email
+Worker: postal-mime → KV staging + Bearer pull API)。
+
+Infra (live): Email Routing rule `tomoshibi@etzhayyim.com → tomoshibi-mail`
+(rule a5f16891…)· KV `TOMOSHIBI_INBOX`(98a1f3a8…)· Resend domain
+etzhayyim.com(4f4d2bc2…、ap-northeast-1)· DNS 追加4件(resend._domainkey
+TXT / send MX+TXT / _dmarc TXT)。residency: zebulun 上の LaunchDaemon
+`com.etzhayyim.tomoshibi.agent`(root fleet.edn / cells.edn 登録、
+`bb fleet:probe` で検証可能)。
+
+Tests: 43 tests / 164 assertions green(R0 の 18/48 から拡張)— HELD は送信も
+attest もされない / stop-request は永続 suppression / auto-generated mail
+(bounce/autoresponder)には決して返信しない / budget 超過で tick 停止 / 送信
+失敗時は attest しない(台帳は「実際に行われた活動」だけを主張する)/ leash
+revoked で全停止、を含む。
+
+R0 の「Explicitly NOT done」の現状(item ごと):
+
+- ~~No app-aozora publication wiring~~ → **publication channel は email に
+  なった**(aozora publisher は依然未実装のまま — email が R1 の channel)。
+- ~~No organizer/advisor LLM~~ → **organizer.cljc**(Ollama、fail-closed)。
+  langchain.model 経由ではなく直接 /api/chat(bb runtime、依存ゼロ)。
+- ~~store は MemStore のみ~~ → **FileStore**(同一 Store protocol、
+  append-only EDN lines)。kotoba Datom log backend は依然 R2+。
+- ~~No revocable CACAO leash wiring~~ → **file-based leash が実際に gate する**
+  (fail-closed、毎 tick)。ただし member-CACAO 署名つき delegation では
+  まだない(R2+)— 「approximation だが実効」と明記。
+- No LangGraph StateGraph orchestration — **依然 未**(plain pipeline のまま。
+  kouhou 型 StateGraph 化は R2+)。
+- `did:web:…:actor:tomoshibi` live 化 — **依然 未**。
+- No RAD identity minting — **依然 未**。
+- cacao.clj の attestation 署名への wiring — **依然 未**(JVM-only モジュール、
+  node runtime は bb のため R1 では見送り。attestation は unsigned)。
