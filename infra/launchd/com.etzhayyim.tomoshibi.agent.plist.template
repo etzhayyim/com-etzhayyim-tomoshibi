@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- tomoshibi resident mail agent — LaunchDaemon template (docs/adr/0002).
+     Substitute @@NODE_USER@@ (fleet node local account, e.g. zebulun), then:
+       sudo cp → /Library/LaunchDaemons/com.etzhayyim.tomoshibi.agent.plist
+       sudo chown root:wheel + chmod 644
+       sudo launchctl bootstrap system /Library/LaunchDaemons/com.etzhayyim.tomoshibi.agent.plist
+     Secrets live in /Users/@@NODE_USER@@/.etzhayyim/tomoshibi/env (mode 600,
+     never committed) — NOT in this plist. See infra/README.md. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>            <string>com.etzhayyim.tomoshibi.agent</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>. /Users/@@NODE_USER@@/.etzhayyim/tomoshibi/env &amp;&amp; exec /opt/homebrew/bin/bb -m tomoshibi.daemon</string>
+  </array>
+  <key>WorkingDirectory</key> <string>/Users/@@NODE_USER@@/tomoshibi/orgs/etzhayyim/com-etzhayyim-tomoshibi</string>
+  <key>UserName</key>         <string>@@NODE_USER@@</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>           <string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>HOME</key>           <string>/Users/@@NODE_USER@@</string>
+  </dict>
+  <key>RunAtLoad</key>        <true/>
+  <key>KeepAlive</key>        <true/>
+  <key>ThrottleInterval</key> <integer>30</integer>
+  <key>StandardOutPath</key>  <string>/Users/@@NODE_USER@@/.etzhayyim/log/tomoshibi.out.log</string>
+  <key>StandardErrorPath</key><string>/Users/@@NODE_USER@@/.etzhayyim/log/tomoshibi.err.log</string>
+</dict>
+</plist>
