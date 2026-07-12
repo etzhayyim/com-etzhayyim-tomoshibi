@@ -1,0 +1,16 @@
+# tomoshibi-mail — inbound staging Worker for tomoshibi@etzhayyim.com.
+# Deploy: npx wrangler deploy   (account: the zone-owning account for
+# etzhayyim.com). Secrets: npx wrangler secret put PULL_TOKEN.
+#
+# The Email Routing rule binding tomoshibi@etzhayyim.com → this Worker is not
+# expressible here — it is created via the Cloudflare API
+# (POST /zones/<zone>/email/routing/rules, action type "worker") — see
+# docs/adr/0002-mail-capability-and-murakumo-residency.md.
+name = "tomoshibi-mail"
+main = "index.js"
+compatibility_date = "2026-06-28"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "TOMOSHIBI_INBOX"
+id = "98a1f3a8dba84da9a56de20b0efab4c7"

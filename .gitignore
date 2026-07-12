@@ -5,3 +5,6 @@
 # the actor's own Ed25519 identity (tomoshibi.cacao/load-or-create-identity!)
 # — never commit a private key
 .tomoshibi/
+infra/mail-worker/node_modules/
+infra/mail-worker/package-lock.json
+infra/mail-worker/.wrangler/

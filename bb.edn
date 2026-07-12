@@ -1,4 +1,11 @@
-{:paths ["src" "test" "../root/20-actors/etzhayyim-organism/src"]
+{:paths ["src" "test"
+         "../root/20-actors/etzhayyim-organism/src"
+         "../../kotoba-lang/mail/src"
+         "../../kotoba-lang/mailer/src"]
  :tasks
- {test {:doc "Run the governor contract test suite"
-        :task (shell "bb" "run_tests.clj")}}}
+ {test {:doc "Run the full offline test suite"
+        :task (shell "bb" "run_tests.clj")}
+  agent {:doc "Run the resident mail agent loop (env-configured; see tomoshibi.daemon)"
+         :task (shell "bb" "-m" "tomoshibi.daemon")}
+  agent:once {:doc "One bounded tick, then exit (deploy smoke / cron fallback)"
+              :task (shell "bb" "-m" "tomoshibi.daemon" "--once")}}}
