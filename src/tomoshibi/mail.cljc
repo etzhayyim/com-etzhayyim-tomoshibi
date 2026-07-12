@@ -62,26 +62,38 @@
   [body]
   (for [{:keys [key value]} (:messages body)]
     {:kv-key key
-     :record (inbound/from-parts
-              {:provider (:provider value "cloudflare-email-routing")
-               :provider-message-id (:provider_message_id value)
-               :from (addr-spec (:from value))
-               :to (:to value)
-               :cc (:cc value)
-               :subject (:subject value)
-               :text (:text value)
-               :html (:html value)
-               :headers (:headers value)
-               :received-at (:received_at value)
-               :spf (keyword (:spf value "none"))
-               :dkim (keyword (:dkim value "none"))
-               :dmarc (keyword (:dmarc value "none"))
-               :attachments (:attachments value [])})}))
+     :record (-> (inbound/from-parts
+                  {:provider (:provider value "cloudflare-email-routing")
+                   :provider-message-id (:provider_message_id value)
+                   :from (addr-spec (:from value))
+                   :to (:to value)
+                   :cc (:cc value)
+                   :subject (:subject value)
+                   :text (:text value)
+                   :html (:html value)
+                   :headers (:headers value)
+                   :received-at (:received_at value)
+                   :spf (keyword (:spf value "none"))
+                   :dkim (keyword (:dkim value "none"))
+                   :dmarc (keyword (:dmarc value "none"))
+                   :attachments (:attachments value [])})
+                 (cond->
+                   (:reply_to value)
+                   (assoc :mail.inbound/reply-to (addr-spec (:reply_to value)))
+                   (:envelope_from value)
+                   (assoc :mail.inbound/envelope-from (addr-spec (:envelope_from value)))))}))
 
 (defn sender-email
-  "The envelope sender of an inbound record (lowercased address string)."
+  "The header-From sender of an inbound record (lowercased address string)."
   [inb]
   (get-in inb [:mail.inbound/message :mail/from :mail.address/email]))
+
+(defn reply-address
+  "Where a reply belongs: explicit Reply-To > header From. NEVER the SMTP
+  envelope sender (that is a bounce/return-path — e.g. an SES feedback
+  address when the inbound was itself sent through a provider)."
+  [inb]
+  (or (:mail.inbound/reply-to inb) (sender-email inb)))
 
 (defn inbound-text
   "Plain-text body of an inbound record (falls back to html-stripped-ish or
@@ -106,11 +118,15 @@
                               (:mail/headers m)))
         auto-submitted (str/lower-case (get headers "auto-submitted" "no"))
         precedence (str/lower-case (get headers "precedence" ""))
-        from (or (sender-email inb) "")]
+        machine-addr? #(re-find #"(?i)^(mailer-daemon|postmaster|no-?reply|bounce)[@+.-]" (str %))]
     (boolean
      (or (not= auto-submitted "no")
          (contains? #{"bulk" "junk" "list"} precedence)
-         (re-find #"(?i)^(mailer-daemon|postmaster|no-?reply|bounce)[@+.-]" from)))))
+         (machine-addr? (or (sender-email inb) ""))
+         (when-some [ef (:mail.inbound/envelope-from inb)]
+           ;; machine envelope OR null MAIL FROM:<> (a bounce) — but a mere
+           ;; provider return-path (SES etc.) is fine, humans send via those
+           (or (machine-addr? ef) (str/blank? ef)))))))
 
 ;; ---------------------------------------------------------------------------
 ;; outbound: reply construction (REPLY-ONLY, the structural invariant)
@@ -133,11 +149,11 @@
 
 (defn reply-message
   "Build the reply to ONE inbound record. The recipient is derived from the
-  inbound sender and nothing else — this function signature is the reply-only
-  invariant. Returns a kotoba-lang mail.message with threading headers and
-  the opt-out footer appended."
+  inbound record (Reply-To > header From) and nothing else — this function
+  signature is the reply-only invariant. Returns a kotoba-lang mail.message
+  with threading headers and the opt-out footer appended."
   [inb draft-text {:keys [from-email from-name]}]
-  (let [to (sender-email inb)
+  (let [to (reply-address inb)
         msg-id (:mail.inbound/provider-message-id inb)
         subject (get-in inb [:mail.inbound/message :mail/subject])]
     (when (str/blank? to)
