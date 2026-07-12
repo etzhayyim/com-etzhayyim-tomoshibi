@@ -50,7 +50,7 @@
   (let [now (now-fn)
         today (subs now 0 10)
         id (:mail.inbound/provider-message-id record)
-        sender (mail/sender-email record)
+        sender (mail/reply-address record)
         subject (get-in record [:mail.inbound/message :mail/subject])
         n-attempts (journal/attempts processed id)
         finish! (fn [status & {:keys [ack?] :or {ack? true}}]

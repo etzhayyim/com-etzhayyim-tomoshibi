@@ -45,7 +45,28 @@
     (testing "mailer-daemon sender"
       (is (mail/auto-generated? (mk {:from "MAILER-DAEMON@mx.example.com"}))))
     (testing "no-reply sender"
-      (is (mail/auto-generated? (mk {:from "noreply@corp.example.com"}))))))
+      (is (mail/auto-generated? (mk {:from "noreply@corp.example.com"}))))
+    (testing "machine ENVELOPE sender (header From looks human)"
+      (is (mail/auto-generated? (mk {:envelope_from "bounce-xyz@ses.example.com"}))))
+    (testing "provider envelope (SES return-path) alone is NOT auto"
+      (is (not (mail/auto-generated?
+                (mk {:envelope_from "0106abc-000@send.provider.example"})))))))
+
+(deftest reply-address-prefers-reply-to-never-envelope
+  (let [mk (fn [overrides]
+             (-> worker-body
+                 (update-in [:messages 0 :value] merge overrides)
+                 mail/parse-inbox vec first :record))]
+    (testing "Reply-To wins over header From"
+      (is (= "human@example.com"
+             (mail/reply-address (mk {:reply_to "Human <human@example.com>"})))))
+    (testing "header From when no Reply-To"
+      (is (= "seeker@example.com" (mail/reply-address (mk {})))))
+    (testing "the SMTP envelope sender is NEVER the reply target"
+      (let [rec (mk {:from "Real Person <person@example.com>"
+                     :envelope_from "0106abc@send.ses.example"})]
+        (is (= "person@example.com" (mail/reply-address rec)))
+        (is (= "0106abc@send.ses.example" (:mail.inbound/envelope-from rec)))))))
 
 (deftest reply-message-threads-and-carries-opt-out
   (let [[{:keys [record]}] (vec (mail/parse-inbox worker-body))

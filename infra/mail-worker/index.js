@@ -41,10 +41,19 @@ export default {
       message.headers.get("message-id") ||
       `<${crypto.randomUUID()}@tomoshibi-mail.etzhayyim>`;
 
+    // `from` = RFC 5322 header From (who a human means by "the sender");
+    // `envelope_from` = SMTP MAIL FROM (bounce/return-path — often an SES/
+    // provider address, NEVER a reply target); `reply_to` = explicit header.
+    // The agent replies to reply_to || from; envelope_from only feeds the
+    // auto-generated/bounce guard.
     const record = {
       provider: "cloudflare-email-routing",
       provider_message_id: providerMessageId,
-      from: message.from,
+      from: (parsed.from && parsed.from.address) || message.from,
+      envelope_from: message.from,
+      reply_to:
+        (parsed.replyTo && parsed.replyTo[0] && parsed.replyTo[0].address) ||
+        null,
       to: [message.to],
       cc: (parsed.cc || []).map((a) => a.address).filter(Boolean),
       subject: parsed.subject || "(no subject)",
