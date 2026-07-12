@@ -151,3 +151,25 @@ R0 の「Explicitly NOT done」の現状(item ごと):
 - No RAD identity minting — **依然 未**。
 - cacao.clj の attestation 署名への wiring — **依然 未**(JVM-only モジュール、
   node runtime は bb のため R1 では見送り。attestation は unsigned)。
+
+## 2026-07-12 — R2 (identity wave): 実鍵 + did:web live + RAD identity
+
+R2 loop iteration 1-3(founder「next, setup loop」指示)。R1 の「依然 未」の
+うち3項目がここで閉じた:
+
+- **actor 実鍵**: zebulun 上で `tomoshibi.cacao/load-or-create-identity!` により
+  永続 Ed25519 identity を生成 — `did:key:z6MkvqXdDba3CZ96nRzYBYiDrnoHP8DtCSgW7duzwFPGnf9Z`
+  (秘密鍵は node の `.tomoshibi/identity.edn`、mode 600、gitignored。
+  reload byte-identical 検証済み。前提として zebulun に openjdk 26 + Clojure CLI
+  を導入 — 将来の attestation 署名も node 上で可能に)。
+- **did:web live**: `did:web:etzhayyim.com:actor:tomoshibi` が
+  https://etzhayyim.com/actor/tomoshibi/did.json で解決(515 actor roster で初の
+  実 verificationMethod 入り。alsoKnownAs に did:key と mailto)。
+- **RAD identity**(ADR-2606231200): `etzhayyim/root` の
+  `80-data/kotoba-rad/tomoshibi.identity.journal.edn` —
+  RID `bafkreice23tmjwuymn4ronuilzrdedupdf2qlcek2xk37t2myd2krvuasi`
+  (`rad:bafkreice23tmj…`)、tx2 で node-held did:key を cross-link。
+  unsigned pilot posture(既存 325 journal と同じ)。root PR #3028。
+
+依然 未(R2 続き): attestation への did:key 署名(iteration 4 予定)/
+member-CACAO leash 本実装 / kotoba Datom log store / StateGraph 化。
