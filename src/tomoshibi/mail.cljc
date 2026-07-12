@@ -170,15 +170,36 @@
                         (str "<mailto:" from-email "?subject=unsubscribe>")}
                  msg-id (assoc "In-Reply-To" msg-id "References" msg-id))})))
 
+(defn- address-string
+  "Resend's REST API requires from/to/reply_to as STRINGS (\"Name <a@b.c>\");
+  mailer.core's address-wire emits {:email :name} maps when a display name is
+  set (observed live: 422 \"The `from` field must be a `string`.\"). Flatten."
+  [a]
+  (cond
+    (string? a) a
+    (map? a) (if-let [n (:name a)]
+               (str n " <" (:email a) ">")
+               (:email a))
+    :else (str a)))
+
 (defn send-request
   "Turn a reply message into the host-executable Resend request
   (mailer.core/request :resend), re-attaching the RFC threading headers that
-  mailer.core's wire format drops."
+  mailer.core's wire format drops and flattening addresses to the string
+  form Resend actually accepts."
   [reply-msg]
   (let [req (mailer/request :resend {:mail.effect/type :mail/send
                                      :mail.effect/message reply-msg})
         headers (:mail/headers reply-msg)]
-    (cond-> req
+    (cond-> (update req :http/json
+                    (fn [j]
+                      (-> j
+                          (update :from address-string)
+                          (update :to #(mapv address-string %))
+                          (update :cc #(mapv address-string %))
+                          (update :bcc #(mapv address-string %))
+                          (cond-> (:reply_to j)
+                            (update :reply_to address-string)))))
       (seq headers) (update :http/json assoc :headers headers))))
 
 (defn parse-send-response

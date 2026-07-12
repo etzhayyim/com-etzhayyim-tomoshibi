@@ -112,6 +112,17 @@
     (is (= "https://api.resend.com/emails" (:http/url req)))
     (is (= :post (:http/method req)))
     (is (= ["seeker@example.com"] (get-in req [:http/json :to])))
+    (testing "Resend requires STRING addresses — a named from must be
+              flattened to \"Name <addr>\", never an {:email :name} object
+              (live 422 otherwise)"
+      (is (= "tomoshibi (灯) <tomoshibi@etzhayyim.com>"
+             (get-in (mail/send-request
+                      (mail/reply-message record "body"
+                                          {:from-email "tomoshibi@etzhayyim.com"
+                                           :from-name "tomoshibi (灯)"}))
+                     [:http/json :from])))
+      (is (string? (get-in req [:http/json :from])))
+      (is (every? string? (get-in req [:http/json :to]))))
     (testing "threading headers survive into the Resend payload (mailer.core
               alone drops them — send-request re-attaches)"
       (is (= "<q1@example.com>" (get-in req [:http/json :headers "In-Reply-To"]))))))
