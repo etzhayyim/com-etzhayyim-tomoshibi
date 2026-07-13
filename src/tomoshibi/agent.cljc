@@ -45,7 +45,8 @@
   {:id … :outcome …} where outcome ∈ #{:skipped :auto :suppressed
   :already-suppressed :gave-up :draft-failed :budget-exhausted :held
   :replied :send-failed}."
-  [{:keys [now-fn ack! draft! send! store read-file append-line paths cfg]}
+  [{:keys [now-fn ack! draft! send! store read-file append-line paths cfg
+           attest-sign!]}
    processed suppressed {:keys [kv-key record]}]
   (let [now (now-fn)
         today (subs now 0 10)
@@ -109,12 +110,17 @@
                   (finish! :held))
               (let [res (send! reply)]
                 (if (:ok? res)
-                  (do (operation/propose! store {:op :mail-reply}
-                                          {:actor-id (:actor-did cfg)}
-                                          prop now (:actor-did cfg))
-                      (append-line (:budget paths)
-                                   (journal/send-entry id (:id res) now))
-                      (finish! :replied))
+                  (let [{:keys [attestation]}
+                        (operation/propose! store {:op :mail-reply}
+                                            {:actor-id (:actor-did cfg)}
+                                            prop now (:actor-did cfg))]
+                    ;; sigref AFTER the attestation exists; signing failure can
+                    ;; never block the reply path (fail-open on signing only)
+                    (when (and attest-sign! attestation)
+                      (attest-sign! attestation))
+                    (append-line (:budget paths)
+                                 (journal/send-entry id (:id res) now))
+                    (finish! :replied))
                   (do (append-line (:processed paths)
                                    (journal/processed-entry id :pending (inc n-attempts) now))
                       (append-line (:ops paths)

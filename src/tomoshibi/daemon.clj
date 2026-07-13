@@ -27,10 +27,13 @@
     TOMOSHIBI_TICK_SECONDS  default 300
     TOMOSHIBI_HEALTHZ_PORT  default 13094"
   (:require [babashka.http-client :as http]
+            [babashka.process :as p]
             [cheshire.core :as json]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [org.httpkit.server :as srv]
             [tomoshibi.agent :as agent]
+            [tomoshibi.attest-sign :as attest]
             [tomoshibi.journal :as journal]
             [tomoshibi.mail :as mail]
             [tomoshibi.organizer :as organizer])
@@ -78,7 +81,8 @@
              :suppress (str state-dir "/suppress.journal.edn")
              :budget (str state-dir "/budget.journal.edn")
              :ops (str state-dir "/ops.journal.edn")
-             :attestations (str state-dir "/attestations.journal.edn")}
+             :attestations (str state-dir "/attestations.journal.edn")
+             :sigrefs (str state-dir "/attestations.sigrefs.journal.edn")}
      :cfg {:from-email (env "TOMOSHIBI_FROM" "tomoshibi@etzhayyim.com")
            :from-name "tomoshibi (灯)"
            :actor-did (env "TOMOSHIBI_ACTOR_DID" "did:web:etzhayyim.com:actor:tomoshibi")
@@ -125,7 +129,29 @@
                                           :url (:http/url req)
                                           :headers {"Authorization" (str "Bearer " resend-key)}
                                           :json (:http/json req)})]
-              (mail/parse-send-response status body)))})
+              (mail/parse-send-response status body)))
+   ;; Sign the just-written attestation's head with the node-held did:key via
+   ;; the JVM helper (scripts/sign_head.clj — Ed25519 needs a real JDK, not
+   ;; bb's SCI). Runs once per committed send (≤ daily budget), so subprocess
+   ;; startup is irrelevant. Fail-open on SIGNING only: helper down → an
+   ;; explicit unsigned sigref (:sig nil) + :sign-failed ops line; the reply
+   ;; and the attestation are never blocked.
+   :attest-sign!
+   (fn [attestation]
+     (let [head (attest/attestation-head attestation)
+           signer (try
+                    (let [{:keys [out exit]} (p/shell {:out :string :err :string
+                                                       :continue true :timeout 60000}
+                                                      "clojure" "-M" "-m" "sign-head" head)]
+                      (when (zero? exit)
+                        (let [r (edn/read-string out)]
+                          (when (attest/valid-signer? r) r))))
+                    (catch Exception _ nil))]
+       (append-line* (:sigrefs paths)
+                     (pr-str (attest/sigref head signer (:actor-did cfg) (now-iso))))
+       (when-not signer
+         (append-line* (:ops paths)
+                       (pr-str {:t :sign-failed :head head :at (now-iso)})))))})
 
 (defonce health (atom {:ticks 0 :last-tick-at nil :last-outcomes nil :started-at nil}))
 
