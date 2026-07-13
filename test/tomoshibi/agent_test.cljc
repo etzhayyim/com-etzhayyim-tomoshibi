@@ -200,3 +200,14 @@
           signed (atom [])]
       (agent/tick! (assoc ctx :attest-sign! #(swap! signed conj %)))
       (is (empty? @signed)))))
+
+(deftest injected-leash-ok-overrides-file
+  (testing "leash-ok? false → nothing runs, even with a legacy-active file"
+    (let [{:keys [ctx fetches sent]}
+          (harness {:msgs [(worker-msg "<l1>" "s@example.com" "q" "question")]})]
+      (is (= :revoked (:leash (agent/tick! (assoc ctx :leash-ok? (constantly false))))))
+      (is (zero? @fetches))
+      (is (empty? @sent))))
+  (testing "leash-ok? true → active even without any leash file"
+    (let [{:keys [ctx]} (harness {:leash? false :msgs []})]
+      (is (= :active (:leash (agent/tick! (assoc ctx :leash-ok? (constantly true)))))))))
