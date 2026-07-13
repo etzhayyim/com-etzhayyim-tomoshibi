@@ -82,7 +82,8 @@
              :budget (str state-dir "/budget.journal.edn")
              :ops (str state-dir "/ops.journal.edn")
              :attestations (str state-dir "/attestations.journal.edn")
-             :sigrefs (str state-dir "/attestations.sigrefs.journal.edn")}
+             :sigrefs (str state-dir "/attestations.sigrefs.journal.edn")
+             :kotoba-journal (str state-dir "/attestations.kotoba.journal.edn")}
      :cfg {:from-email (env "TOMOSHIBI_FROM" "tomoshibi@etzhayyim.com")
            :from-name "tomoshibi (灯)"
            :actor-did (env "TOMOSHIBI_ACTOR_DID" "did:web:etzhayyim.com:actor:tomoshibi")
@@ -100,15 +101,39 @@
     (when-not v
       (throw (ex-info (str "missing required env " k) {:env k})))))
 
+(defn- open-store!
+  "Attestation store backend. TOMOSHIBI_STORE=kotoba (default) → the
+  kotoba-Datom-log store (tomoshibi.kotoba-store over etzhayyim.kotoba.engine,
+  the repo-wide canonical-state substrate), seeded ONCE from the legacy
+  FileStore rows so a backend switch never orphans ledger history; =file, or
+  the engine missing from the classpath → FileStore. Fail-open: a storage
+  upgrade must never take the actor down (fallback is logged to ops)."
+  [paths]
+  (let [file-store (journal/file-store read-file* append-line* (:attestations paths))]
+    (if-not (= "kotoba" (env "TOMOSHIBI_STORE" "kotoba"))
+      {:store file-store :backend :file}
+      (try
+        (let [open (requiring-resolve 'tomoshibi.kotoba-store/open)
+              seed ((requiring-resolve 'tomoshibi.store/all-attestations) file-store)
+              {:keys [store migrated]} (open (:kotoba-journal paths) seed)]
+          {:store store :backend :kotoba :migrated migrated})
+        (catch Exception e
+          {:store file-store :backend :file :fallback (ex-message e)})))))
+
 (defn build-ctx
   "Wire the real effects into an agent/tick! ctx."
   [{:keys [pull resend-key ollama paths cfg]}]
-  {:now-fn now-iso
+  (let [{:keys [store backend migrated fallback]} (open-store! paths)]
+    (append-line* (:ops paths)
+                  (pr-str (cond-> {:t :store-opened :backend backend :at (now-iso)}
+                            migrated (assoc :migrated migrated)
+                            fallback (assoc :fallback fallback))))
+    {:now-fn now-iso
    :read-file read-file*
    :append-line append-line*
    :paths paths
    :cfg cfg
-   :store (journal/file-store read-file* append-line* (:attestations paths))
+   :store store
    :fetch! (fn [limit]
              (let [{:keys [status body]} (http-exec (mail/fetch-request pull limit))]
                (if (and status (< status 300) body)
@@ -151,7 +176,7 @@
                      (pr-str (attest/sigref head signer (:actor-did cfg) (now-iso))))
        (when-not signer
          (append-line* (:ops paths)
-                       (pr-str {:t :sign-failed :head head :at (now-iso)})))))})
+                       (pr-str {:t :sign-failed :head head :at (now-iso)})))))}))
 
 (defonce health (atom {:ticks 0 :last-tick-at nil :last-outcomes nil :started-at nil}))
 

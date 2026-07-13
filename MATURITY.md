@@ -191,3 +191,21 @@ ops 行を明示的に残し、返信と attestation 本体は決してブロッ
 注入 `:attest-sign!`(optional)を **propose! 成功後にのみ** 呼ぶ。
 49 tests / 190 assertions green — sigref は :replied でのみ発火し、HELD /
 send-failure では決して発火しないことを含む。
+
+## 2026-07-13 — R2 iteration 5: kotoba Datom log store(canonical substrate)
+
+`tomoshibi.kotoba-store` — `etzhayyim.kotoba.engine`(organism が使う同じ bb
+engine、repo-wide「state = kotoba Datom log」規則の canonical 経路)上の
+`Store` protocol 実装。1 attestation = 1 entity、entity id は
+`attestation:<sha256-head>`(sigref journal が署名するのと**同一 hash** —
+台帳 row・Datom entity・Ed25519 sigref が1つの content hash で相互リンク)。
+attrs は `:evangelism.attestation/*`。content-addressed id により再記録は
+read-idempotent。daemon は `TOMOSHIBI_STORE=kotoba`(既定)で opening 時に
+旧 FileStore rows を**一回だけ** seed migration(orphan なし)、engine が
+classpath に無い場合は FileStore に fail-open fallback(`:store-opened`
+ops 行で backend/migrated/fallback を明示)。node 側は root sparse checkout
+に 70-tools/src を追加して engine を供給。52 tests / 199 assertions green
+(temp Datom journal での durable reconnect / migration 一回性を含む)。
+
+これで R0 から持ち越しの store 課題は closed。残: member-CACAO leash 本実装 /
+StateGraph 化(kouhou 型 orchestration)。
