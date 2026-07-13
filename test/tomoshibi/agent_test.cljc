@@ -211,3 +211,17 @@
   (testing "leash-ok? true → active even without any leash file"
     (let [{:keys [ctx]} (harness {:leash? false :msgs []})]
       (is (= :active (:leash (agent/tick! (assoc ctx :leash-ok? (constantly true)))))))))
+
+(deftest injected-propose-fn-is-used
+  (testing "a graph-shaped propose-fn (returns {:attestation}) drives commit"
+    (let [{:keys [ctx sent]}
+          (harness {:msgs [(worker-msg "<pf1>" "s@example.com" "q" "question")]
+                    :draft-fn (constantly "A warm invitation, no pressure.")})
+          calls (atom [])
+          fake-propose (fn [store req ctx prop now cell-did]
+                         (swap! calls conj prop)
+                         (tomoshibi.operation/propose! store req ctx prop now cell-did))
+          result (agent/tick! (assoc ctx :propose-fn fake-propose))]
+      (is (= [:replied] (mapv :outcome (:outcomes result))))
+      (is (= 1 (count @calls)) "the injected propose-fn ran exactly once")
+      (is (= 1 (count @sent))))))
