@@ -254,3 +254,16 @@ daemon は proven な plain-pipeline path(tomoshibi.agent)を既定に保ち、g
 
 **R2 backlog は全項目 landed**: 実鍵 / did:web live / RAD identity /
 signed attestations / kotoba Datom store / member-CACAO leash / StateGraph。
+
+## 2026-07-13 — R3 iteration 8-A: StateGraph を daemon の既定 decision path に
+
+`open-propose!`(daemon)— `TOMOSHIBI_ORCHESTRATION=stategraph`(既定)で
+`tomoshibi.graph` の langgraph StateGraph を一度 compile して閉じ込め、
+propose! と同一シグネチャの `:propose-fn` として agent tick に注入。=plain、
+または langgraph が classpath に無い場合は plain `operation/propose!` に
+**fail-open fallback**(`:orchestration-fallback` ops 行 — orchestration upgrade
+は actor を落とさない、open-store! と同姿勢)。`:store-opened` ops 行に
+`:orchestration` を併記。agent.cljc は `:propose-fn`(既定 operation/propose!)
+を destructure。58 tests / 228 assertions green。live 決定経路が checkpointed
+StateGraph を通るようになった(graph_test で propose! と decision-equivalent を
+実証済みなので挙動不変)。

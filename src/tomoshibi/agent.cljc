@@ -46,7 +46,8 @@
   :already-suppressed :gave-up :draft-failed :budget-exhausted :held
   :replied :send-failed}."
   [{:keys [now-fn ack! draft! send! store read-file append-line paths cfg
-           attest-sign!]}
+           attest-sign! propose-fn]
+    :or {propose-fn operation/propose!}}
    processed suppressed {:keys [kv-key record]}]
   (let [now (now-fn)
         today (subs now 0 10)
@@ -111,9 +112,9 @@
               (let [res (send! reply)]
                 (if (:ok? res)
                   (let [{:keys [attestation]}
-                        (operation/propose! store {:op :mail-reply}
-                                            {:actor-id (:actor-did cfg)}
-                                            prop now (:actor-did cfg))]
+                        (propose-fn store {:op :mail-reply}
+                                    {:actor-id (:actor-did cfg)}
+                                    prop now (:actor-did cfg))]
                     ;; sigref AFTER the attestation exists; signing failure can
                     ;; never block the reply path (fail-open on signing only)
                     (when (and attest-sign! attestation)

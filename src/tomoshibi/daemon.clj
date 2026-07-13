@@ -121,6 +121,31 @@
         (catch Exception e
           {:store file-store :backend :file :fallback (ex-message e)})))))
 
+(defn- open-propose!
+  "The governed-decision + commit path. TOMOSHIBI_ORCHESTRATION=stategraph
+  (default) → tomoshibi.graph's langgraph StateGraph (checkpointed, auditable),
+  compiled ONCE and closed over; =plain, or langgraph missing from the
+  classpath → the plain tomoshibi.operation/propose! pipeline. Fail-open: an
+  orchestration upgrade must never take the actor down (same posture as
+  open-store!). Returns a fn with propose!'s signature
+  (store req ctx proposal now attesting-cell-did → {:disposition …})."
+  [store paths]
+  (let [plain (requiring-resolve 'tomoshibi.operation/propose!)]
+    (if-not (= "stategraph" (env "TOMOSHIBI_ORCHESTRATION" "stategraph"))
+      {:propose-fn plain :orchestration :plain}
+      (try
+        (let [build (requiring-resolve 'tomoshibi.graph/build)
+              run (requiring-resolve 'tomoshibi.graph/run)
+              compiled (build store)]
+          {:propose-fn (fn [_store req ctx proposal now cell-did]
+                         (run compiled req ctx proposal now cell-did))
+           :orchestration :stategraph})
+        (catch Exception e
+          (append-line* (:ops paths)
+                        (pr-str {:t :orchestration-fallback :to :plain
+                                 :reason (ex-message e) :at (now-iso)}))
+          {:propose-fn plain :orchestration :plain})))))
+
 (defn- leash-ok-fn
   "The member-CACAO leash check (ADR-2606111400 lineage). Pure field checks
   run on EVERY call (bb-cheap, fail-closed); the Ed25519 signature is
@@ -160,9 +185,11 @@
 (defn build-ctx
   "Wire the real effects into an agent/tick! ctx."
   [{:keys [pull resend-key ollama paths cfg]}]
-  (let [{:keys [store backend migrated fallback]} (open-store! paths)]
+  (let [{:keys [store backend migrated fallback]} (open-store! paths)
+        {:keys [propose-fn orchestration]} (open-propose! store paths)]
     (append-line* (:ops paths)
-                  (pr-str (cond-> {:t :store-opened :backend backend :at (now-iso)}
+                  (pr-str (cond-> {:t :store-opened :backend backend
+                                   :orchestration orchestration :at (now-iso)}
                             migrated (assoc :migrated migrated)
                             fallback (assoc :fallback fallback))))
     (when (= :legacy (:mode (leash/status (read-file* (:leash paths))
@@ -173,6 +200,7 @@
                     (pr-str {:t :leash-legacy :at (now-iso)
                              :note "v0 unsigned leash — mint a member-signed v1 with scripts/leash_mint.clj"})))
     {:leash-ok? (leash-ok-fn paths cfg)
+     :propose-fn propose-fn
      :now-fn now-iso
    :read-file read-file*
    :append-line append-line*
