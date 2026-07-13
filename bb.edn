@@ -1,6 +1,8 @@
 {:paths ["src" "test"
          "../root/20-actors/etzhayyim-organism/src"
          "../root/70-tools/src"
+         "../../com-junkawasaki/langgraph-clj/src"
+         "../../com-junkawasaki/langchain-clj/src"
          "../../kotoba-lang/mail/src"
          "../../kotoba-lang/mailer/src"]
  :tasks

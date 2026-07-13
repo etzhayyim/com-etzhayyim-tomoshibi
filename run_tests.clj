@@ -7,6 +7,7 @@
             [tomoshibi.agent-test]
             [tomoshibi.attest-sign-test]
             [tomoshibi.governor-test]
+            [tomoshibi.graph-test]
             [tomoshibi.journal-test]
             [tomoshibi.kotoba-store-test]
             [tomoshibi.leash-test]
@@ -25,7 +26,8 @@
                        'tomoshibi.organizer-test
                        'tomoshibi.agent-test
                        'tomoshibi.attest-sign-test
-                       'tomoshibi.kotoba-store-test)]
+                       'tomoshibi.kotoba-store-test
+                       'tomoshibi.graph-test)]
     (when (pos? (+ (:fail res 0) (:error res 0)))
       (System/exit 1))))
 
