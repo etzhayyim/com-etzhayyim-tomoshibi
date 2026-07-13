@@ -132,8 +132,10 @@
   "One bounded pass. Fetches at most :max-per-tick staged inbound mails and
   runs each through process-message!. Stops early when the daily budget is
   exhausted. Returns {:leash … :outcomes [...]}"
-  [{:keys [read-file fetch! paths cfg] :as ctx}]
-  (if-not (leash/active? read-file (:leash paths))
+  [{:keys [read-file fetch! paths cfg leash-ok?] :as ctx}]
+  ;; leash-ok? (injected) = the member-signed v1 path (daemon caches the JVM
+  ;; signature verification); absent → legacy v0 file check (offline suite).
+  (if-not (if leash-ok? (leash-ok?) (leash/active? read-file (:leash paths)))
     {:leash :revoked :outcomes []}
     (let [processed (journal/load-processed read-file (:processed paths))
           suppressed (suppress/load-suppressed read-file (:suppress paths))

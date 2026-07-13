@@ -35,6 +35,7 @@
             [tomoshibi.agent :as agent]
             [tomoshibi.attest-sign :as attest]
             [tomoshibi.journal :as journal]
+            [tomoshibi.leash :as leash]
             [tomoshibi.mail :as mail]
             [tomoshibi.organizer :as organizer])
   (:import (java.time Instant)))
@@ -120,6 +121,42 @@
         (catch Exception e
           {:store file-store :backend :file :fallback (ex-message e)})))))
 
+(defn- leash-ok-fn
+  "The member-CACAO leash check (ADR-2606111400 lineage). Pure field checks
+  run on EVERY call (bb-cheap, fail-closed); the Ed25519 signature is
+  verified via scripts/verify_leash.clj (JVM) only when the file content
+  changes, verdict cached by content hash. Legacy v0 files stay active
+  through the migration window (deprecation logged at boot). Helper failure
+  → NOT ok (a leash must fail closed, opposite of the sigref's fail-open)."
+  [paths cfg]
+  (let [cache (atom nil)]
+    (fn []
+      (let [content (read-file* (:leash paths))
+            {:keys [mode]} (leash/status content
+                                         {:aud (:actor-did cfg)
+                                          :issuer (env "TOMOSHIBI_LEASH_ISSUER" nil)
+                                          :now (now-iso)})]
+        (case mode
+          :legacy true
+          :signed
+          (let [h (attest/sha256-hex (str content))]
+            (if (= h (:hash @cache))
+              (boolean (:valid? @cache))
+              (let [valid? (try
+                             (zero? (:exit (p/shell {:out :string :err :string
+                                                     :continue true :timeout 60000}
+                                                    "clojure" "-M" "-m" "verify-leash"
+                                                    (:leash paths)
+                                                    (env "TOMOSHIBI_LEASH_ISSUER" "")
+                                                    (:actor-did cfg))))
+                             (catch Exception _ false))]
+                (append-line* (:ops paths)
+                              (pr-str {:t :leash-verified :valid valid?
+                                       :hash (subs h 0 12) :at (now-iso)}))
+                (reset! cache {:hash h :valid? valid?})
+                valid?)))
+          false)))))
+
 (defn build-ctx
   "Wire the real effects into an agent/tick! ctx."
   [{:keys [pull resend-key ollama paths cfg]}]
@@ -128,7 +165,15 @@
                   (pr-str (cond-> {:t :store-opened :backend backend :at (now-iso)}
                             migrated (assoc :migrated migrated)
                             fallback (assoc :fallback fallback))))
-    {:now-fn now-iso
+    (when (= :legacy (:mode (leash/status (read-file* (:leash paths))
+                                          {:aud (:actor-did cfg)
+                                           :issuer (env "TOMOSHIBI_LEASH_ISSUER" nil)
+                                           :now (now-iso)})))
+      (append-line* (:ops paths)
+                    (pr-str {:t :leash-legacy :at (now-iso)
+                             :note "v0 unsigned leash — mint a member-signed v1 with scripts/leash_mint.clj"})))
+    {:leash-ok? (leash-ok-fn paths cfg)
+     :now-fn now-iso
    :read-file read-file*
    :append-line append-line*
    :paths paths

@@ -209,3 +209,23 @@ ops 行で backend/migrated/fallback を明示)。node 側は root sparse checko
 
 これで R0 から持ち越しの store 課題は closed。残: member-CACAO leash 本実装 /
 StateGraph 化(kouhou 型 orchestration)。
+
+## 2026-07-13 — R2 iteration 6: member-CACAO leash 本実装(ADR-2606111400)
+
+leash が file-flag approximation から **member 署名付き delegation** に昇格。
+`leash.edn` v1 = `{:v 1 :aud <actor did:web> :cap "evangelism-mail"
+:issued-at :expiry :by <member did:key> :sig <Ed25519 hex>}`。署名対象は
+`leash/canonical-message`(フィールドから決定論的に再構築 — 埋め込み文言は
+信用しない)。検査は二層: 毎 tick の純検査(bb — aud/issuer-pin/expiry/形)+
+内容変更時のみ `scripts/verify_leash.clj`(JVM、did:key multibase→raw→X.509
+復元で Ed25519 検証)を実行し content-hash でキャッシュ。**issuer は file
+でなく設定に pin**(`TOMOSHIBI_LEASH_ISSUER`)— 鍵ごと差し替えた偽 leash は
+issuer-mismatch で死ぬ。**leash は fail-closed**(helper 不調 = NOT ok —
+sigref の fail-open と対称)。revocation: file 削除(即時)/上書き/expiry
+放置(dead-man: 30日で自然失効、`scripts/leash_mint.clj` で member が更新)。
+member 鍵は owner 機の `~/.etzhayyim/member/member.identity.edn`(600)のみ —
+node にも repo にも置かない。legacy v0 は migration 窓の間 active 扱い
+(boot 時 `:leash-legacy` 警告)。実測: valid → true / sig 改竄 → 拒否 /
+issuer 不一致 → 拒否。54 tests / 215 assertions green。
+
+**これで R2 backlog は StateGraph 化を残すのみ。**
