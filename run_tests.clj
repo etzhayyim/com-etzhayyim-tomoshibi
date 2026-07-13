@@ -8,6 +8,7 @@
             [tomoshibi.attest-sign-test]
             [tomoshibi.governor-test]
             [tomoshibi.journal-test]
+            [tomoshibi.kotoba-store-test]
             [tomoshibi.leash-test]
             [tomoshibi.mail-test]
             [tomoshibi.operation-test]
@@ -23,7 +24,8 @@
                        'tomoshibi.leash-test
                        'tomoshibi.organizer-test
                        'tomoshibi.agent-test
-                       'tomoshibi.attest-sign-test)]
+                       'tomoshibi.attest-sign-test
+                       'tomoshibi.kotoba-store-test)]
     (when (pos? (+ (:fail res 0) (:error res 0)))
       (System/exit 1))))
 

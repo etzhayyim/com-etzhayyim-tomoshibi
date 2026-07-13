@@ -1,5 +1,6 @@
 {:paths ["src" "test"
          "../root/20-actors/etzhayyim-organism/src"
+         "../root/70-tools/src"
          "../../kotoba-lang/mail/src"
          "../../kotoba-lang/mailer/src"]
  :tasks
