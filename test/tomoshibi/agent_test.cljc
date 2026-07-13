@@ -174,3 +174,29 @@
     (testing "a failed send leaves NO attestation and no ack (retry later)"
       (is (empty? (store/all-attestations mem-store)))
       (is (empty? @acked)))))
+
+(deftest attest-sign-fires-only-on-confirmed-send
+  (testing "committed send → attest-sign! called with the attestation"
+    (let [{:keys [ctx mem-store]}
+          (harness {:msgs [(worker-msg "<sig1>" "s@example.com" "q" "question")]
+                    :draft-fn (constantly "A warm answer, no pressure at all.")})
+          signed (atom [])
+          result (agent/tick! (assoc ctx :attest-sign! #(swap! signed conj %)))]
+      (is (= [:replied] (mapv :outcome (:outcomes result))))
+      (is (= 1 (count @signed)))
+      (is (= (tomoshibi.store/all-attestations mem-store) @signed))))
+  (testing "HELD → no attestation, no sigref"
+    (let [{:keys [ctx]}
+          (harness {:msgs [(worker-msg "<sig2>" "s@example.com" "q" "question")]
+                    :draft-fn (constantly "You must join now or else you will suffer.")})
+          signed (atom [])]
+      (agent/tick! (assoc ctx :attest-sign! #(swap! signed conj %)))
+      (is (empty? @signed))))
+  (testing "send failure → no sigref"
+    (let [{:keys [ctx]}
+          (harness {:msgs [(worker-msg "<sig3>" "s@example.com" "q" "question")]
+                    :draft-fn (constantly "A gentle answer, no pressure.")
+                    :send-ok? false})
+          signed (atom [])]
+      (agent/tick! (assoc ctx :attest-sign! #(swap! signed conj %)))
+      (is (empty? @signed)))))

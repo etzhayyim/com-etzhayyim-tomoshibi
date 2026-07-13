@@ -173,3 +173,21 @@ R2 loop iteration 1-3(founder「next, setup loop」指示)。R1 の「依然 未
 
 依然 未(R2 続き): attestation への did:key 署名(iteration 4 予定)/
 member-CACAO leash 本実装 / kotoba Datom log store / StateGraph 化。
+
+## 2026-07-13 — R2 iteration 4: signed attestations(sigref journal)
+
+attestation 台帳の row は lexicon 形のまま一切触れず、**並行 append-only journal
+`attestations.sigrefs.journal.edn`** に RAD sigref パターン
+(etzhayyim.kotoba-rad/sigref-datom 前例)で署名を積む: 1 committed attestation
+= 1 sigref、`:head` = attestation 行(pr-str)の sha256、`:sig` = node 保持
+did:key(z6MkvqXd…)の Ed25519 署名 hex。署名は JVM helper
+`scripts/sign_head.clj`(clojure -M -m sign-head <head>)を send 成功時のみ
+subprocess 起動(日次 budget ≤20 なので起動コストは無視可)。**fail-open は
+署名のみ** — helper 不調時は `:sig nil` の unsigned sigref + `:sign-failed`
+ops 行を明示的に残し、返信と attestation 本体は決してブロックしない
+(kotoba-rad unsigned pilot と同じ honest posture)。
+
+`tomoshibi.attest-sign`(pure builders + signer shape 検証)/ agent.cljc は
+注入 `:attest-sign!`(optional)を **propose! 成功後にのみ** 呼ぶ。
+49 tests / 190 assertions green — sigref は :replied でのみ発火し、HELD /
+send-failure では決して発火しないことを含む。

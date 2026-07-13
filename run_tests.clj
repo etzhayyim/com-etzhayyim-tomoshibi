@@ -5,6 +5,7 @@
   etzhayyim/root sensors checkout and the kotoba-lang mail/mailer libs)."
   (:require [clojure.test :refer [run-tests]]
             [tomoshibi.agent-test]
+            [tomoshibi.attest-sign-test]
             [tomoshibi.governor-test]
             [tomoshibi.journal-test]
             [tomoshibi.leash-test]
@@ -21,7 +22,8 @@
                        'tomoshibi.journal-test
                        'tomoshibi.leash-test
                        'tomoshibi.organizer-test
-                       'tomoshibi.agent-test)]
+                       'tomoshibi.agent-test
+                       'tomoshibi.attest-sign-test)]
     (when (pos? (+ (:fail res 0) (:error res 0)))
       (System/exit 1))))
 
