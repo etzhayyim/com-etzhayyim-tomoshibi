@@ -1,0 +1,3 @@
+;; Auto-generated from bb.edn (ADR-2607173000).
+;; nbb scripts/run-task.cljs <task> [args…]
+{:agent {:cmd ["bb" "-m" "tomoshibi.daemon"], :doc "Run the resident mail agent loop (env-configured; see tomoshibi.daemon)"}, :agent:once {:cmd ["bb" "-m" "tomoshibi.daemon" "--once"], :doc "One bounded tick, then exit (deploy smoke / cron fallback)"}, :test {:cmd ["bb" "run_tests.clj"], :doc "Run the full offline test suite"}}
