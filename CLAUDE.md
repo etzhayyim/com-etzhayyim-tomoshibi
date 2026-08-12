@@ -29,7 +29,7 @@ and checked every tick; outer kill switches: disable the routing rule, or
 
 tomoshibi NEVER publishes invitational content the EvangelismGovernor
 rejects. Every governed proposal is scanned by
-`etzhayyim-organism.sensors.evangelism-gate/gate` (which itself composes
+`kotodama.organism.sensors.evangelism-gate/gate` (which itself composes
 with `charter-rider/scan`). No-opt-out / individual-vulnerability-targeting
 / coercion / minor-solo-solicitation / catastrophe-veto proposals are
 HELD — recorded as a hold, never published. Publication (once the
@@ -48,9 +48,13 @@ target-list (ADR-2606281500 rule 4).
   needs a real JDK, confirmed not resolvable the same way from bb's SCI).
 - `bb.edn` **used to** add `../root/20-actors/etzhayyim-organism/src` as an
   extra classpath entry; ADR-2607173000 deleted it when babashka was retired,
-  and nothing in `deps.edn` replaced that entry. This actor still depends on
-  that sibling source being present, and as of 2026-08-13 it is not — see
-  README.md "Run tests" (ADR-2608133200).
+  and for a while nothing in `deps.edn` replaced it. `deps.edn`'s `:siblings`
+  alias does now (ADR-2608135000), and it points somewhere else: etzhayyim/root
+  drained `20-actors/etzhayyim-organism` on 2026-07-18 (`6ad7cd5`) and its
+  `MOVED.edn` names `kotoba-lang/kotodama` as the new home of the generic cljc
+  organism sensors. Run tasks via `nbb scripts/run-task.cljs <task>`, never
+  `bb`; the aliases carry the classpath now, and drifting them apart from each
+  other is how the suite starts passing while the daemon cannot start.
 - The actor's own Ed25519 identity lives in `.tomoshibi/identity.edn`
   (gitignored) — NEVER commit a private key. Generated on first
   `tomoshibi.cacao/load-or-create-identity!` call.
