@@ -46,14 +46,17 @@ target-list (ADR-2606281500 rule 4).
   `.clj` only for JVM-only I/O — `cacao.clj` (self-sovereign Ed25519
   identity; faithful port of `kouhou.cacao`, `KeyPairGenerator "Ed25519"`
   needs a real JDK, confirmed not resolvable the same way from bb's SCI).
-- `bb.edn` adds `../root/20-actors/etzhayyim-organism/src` as an extra
-  classpath entry — this actor depends on that sibling checkout being
-  present at the expected relative path (west-managed monorepo layout,
-  same pattern as kouhou's `:local/root "../../com-junkawasaki/langgraph-clj"`).
+- `bb.edn` **used to** add `../root/20-actors/etzhayyim-organism/src` as an
+  extra classpath entry; ADR-2607173000 deleted it when babashka was retired,
+  and nothing in `deps.edn` replaced that entry. This actor still depends on
+  that sibling source being present, and as of 2026-08-13 it is not — see
+  README.md "Run tests" (ADR-2608133200).
 - The actor's own Ed25519 identity lives in `.tomoshibi/identity.edn`
   (gitignored) — NEVER commit a private key. Generated on first
   `tomoshibi.cacao/load-or-create-identity!` call.
-- `bb run_tests.clj` for the bb-based suite (18 tests / 48 assertions —
+- `nbb scripts/run-task.cljs test` is the registered entrypoint for the suite,
+  but it does not currently run — see README.md "Run tests" for the two reasons.
+  (When last runnable: 18 tests / 48 assertions —
   governor + store/operation, `.cljc` only). `clojure -M -m cacao-smoke`
   for the JVM-only cacao smoke script (no automated `clojure.test` for
   cacao, matching kouhou/tashikame — see MATURITY.md). No clj-kondo lint

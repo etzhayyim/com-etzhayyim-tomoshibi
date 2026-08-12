@@ -110,12 +110,34 @@ minted CACAO, `verify?` accepting the actor's own signature, and
 ## Run tests
 
 ```bash
-bb run_tests.clj
-# or explicitly:
-bb --classpath "src:test:../root/20-actors/etzhayyim-organism/src" run_tests.clj
+nbb scripts/run-task.cljs test
 ```
 
-18 tests / 48 assertions, all green — governor coverage (clean-invitation
+> **This does not currently run**, and it is worth being precise about why,
+> because there are two independent faults and fixing either alone changes
+> nothing (measured 2026-08-13, ADR-2608133200):
+>
+> 1. `scripts/tasks.edn` is a **facade**, not a conversion — all three entries
+>    (`test`, `agent`, `agent:once`) have a `:cmd` of `["bb" …]`. babashka was
+>    retired as this workspace's script host by ADR-2607173000 and the same
+>    conversion deleted the `bb.edn` that supplied bb's classpath, so `bb` now
+>    starts with no `src`/`test` on it and fails with
+>    `Could not locate tomoshibi/agent_test…`.
+> 2. The suite requires `etzhayyim_organism.sensors.evangelism-gate` (via
+>    `tomoshibi.governor`). That source is **not** at the documented sibling
+>    path `../root/20-actors/etzhayyim-organism/src` — `etzhayyim/root` carries
+>    only `20-actors/todoke` on `main`, and the namespace is not in
+>    `com-etzhayyim-app-organism` either. So the suite does not run under JVM
+>    Clojure with `test` on the classpath, and would not run under bb even with
+>    a restored `bb.edn`.
+>
+> The 18 tests / 48 assertions recorded below were real when measured, but they
+> cannot be reproduced from this repository as it stands. Locating the
+> `etzhayyim-organism` sensors source, or cutting `governor`'s dependency on it,
+> is a prerequisite to re-registering this task — that is a decision about the
+> actor, not a mechanical conversion, so it has not been made here.
+
+When last runnable: 18 tests / 48 assertions, all green — governor coverage (clean-invitation
 commits, missing-opt-out / individual-targeting / coercion /
 minor-solo-solicitation / delegated-charter-rider-hit all HOLD,
 no-actuation HOLD, hold-fact audit recording) plus operation/store coverage
