@@ -1,3 +1,16 @@
-;; Auto-generated from bb.edn (ADR-2607173000).
-;; nbb scripts/run-task.cljs <task> [args…]
-{:agent {:cmd ["bb" "-m" "tomoshibi.daemon"], :doc "Run the resident mail agent loop (env-configured; see tomoshibi.daemon)"}, :agent:once {:cmd ["bb" "-m" "tomoshibi.daemon" "--once"], :doc "One bounded tick, then exit (deploy smoke / cron fallback)"}, :test {:cmd ["bb" "run_tests.clj"], :doc "Run the full offline test suite"}}
+;; Task registry for `nbb scripts/run-task.cljs <task> [args…]` (ADR-2607173000).
+;;
+;; All three entries used to read ["bb" …] while bb.edn — which had supplied bb's classpath — was
+;; already deleted, so every one of them died on "Could not locate tomoshibi/agent_test…". Converted
+;; in ADR-2608135000; the classpath they need is now in deps.edn's :test and :daemon aliases.
+{:agent
+ {:cmd ["clojure" "-M:siblings:daemon"]
+  :doc "Run the resident mail agent loop (env-configured; see tomoshibi.daemon). Requires TOMOSHIBI_PULL_URL, TOMOSHIBI_PULL_TOKEN and RESEND_API_KEY; residence is the launchd LaunchDaemon under infra/launchd, never `nohup … &`."}
+
+ :agent:once
+ {:cmd ["clojure" "-M:siblings:daemon" "--once"]
+  :doc "One bounded tick, then exit (deploy smoke / cron fallback). Same env as `agent`; exits 1 if the tick reports an error."}
+
+ :test
+ {:cmd ["clojure" "-M:siblings:test"]
+  :doc "Run the full offline test suite (run_tests.clj). Needs the west siblings orgs/kotoba-lang/{kotodama,mail,mailer,langgraph} and orgs/etzhayyim/root, wired by the :test alias."}}

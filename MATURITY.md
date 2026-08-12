@@ -267,3 +267,39 @@ propose! と同一シグネチャの `:propose-fn` として agent tick に注�
 を destructure。58 tests / 228 assertions green。live 決定経路が checkpointed
 StateGraph を通るようになった(graph_test で propose! と decision-equivalent を
 実証済みなので挙動不変)。
+
+## 2026-08-13 — R3 iteration 8-B: the actor's own task registry could not start it
+
+`scripts/tasks.edn` の 3 entry がすべて `["bb" …]` の facade だった。babashka は
+ADR-2607173000 で退役済みで、同じ変換が classpath を供給していた `bb.edn` を消して
+いたので、`test` / `agent` / `agent:once` のどれも起動しなかった(fleet node には
+bb 自体が無いので、ここで動いていたのは laptop に bb が残っていたからでもない —
+bb.edn が無いので laptop でも落ちる)。
+
+facade を外して初めて見えた欠落は 4 つ。**どれも「無い」のではなく「宣言されて
+いなかった」**:
+
+1. `tomoshibi.governor` が要求する evangelism gate は、etzhayyim/root が
+   2026-07-18 に `20-actors/etzhayyim-organism` を drain した際(`6ad7cd5`)、
+   その `MOVED.edn` が名指すとおり `kotoba-lang/kotodama` へ移っていた。
+   `kotodama.organism.sensors.evangelism-gate` に repoint(API は `gate`/`reason`
+   のまま)。**依存が消えたのではなく、移動に追随していなかった。**
+2. `tomoshibi.mail` の `mail.inbound` / `mail.message` / `mailer.core` →
+   `kotoba-lang/{mail,mailer}`。
+3. `tomoshibi.graph` の `langgraph.graph` → `kotoba-lang/langgraph`。
+4. `tomoshibi.kotoba-store` の `etzhayyim.kotoba.engine` →
+   `etzhayyim/root` の `70-tools/src`。
+
+加えて daemon は `babashka.http-client` / `babashka.process` / `cheshire` を
+require していたが、どこにも宣言が無かった — **babashka が同梱していたから宣言
+する圧力が消えていた**だけで、3 つとも普通の maven artifact。`:daemon` alias に
+宣言した。
+
+`:siblings` alias を作り `:test` / `:daemon` の両方が合成する形にした(重複させると
+「suite は green だが daemon は起動しない」がいずれ発生する)。
+
+実測(2026-08-13): `nbb scripts/run-task.cljs test` → **58 tests / 228 assertions,
+0 failures**(前 iteration と同値 — 退行なし)。`agent:once` → 実 tick が走り
+`{:leash :revoked, :outcomes []}`(leash 不在なので正しく何もしない)。`agent` →
+resident 起動、loopback healthz が `{"ok":true,"cell":"TomoshibiEvangelismMailCell",
+"ticks":1,…,"leash":"revoked"}` を返す。ADR-2608135000。

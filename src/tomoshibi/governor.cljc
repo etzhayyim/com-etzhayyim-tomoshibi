@@ -15,18 +15,25 @@
   HARD (never publish):
     :no-actuation        proposal :effect ≠ :assessment (tomoshibi only
                           proposes invitational content, never actuates)
-    :evangelism-gate-hit etzhayyim_organism.sensors.evangelism-gate/gate
+    :evangelism-gate-hit kotodama.organism.sensors.evangelism-gate/gate
                           found a §1.16(a)-(d) hit (individual-vulnerability
                           targeting / coercion / minor-solo solicitation / no
                           opt-out affordance) OR a delegated charter_rider
                           §2 catastrophe-veto hit
 
   This governor is a REAL wiring, not an R0 illustrative placeholder — it
-  requires etzhayyim-organism.sensors.evangelism-gate directly (via the
-  extra classpath entry in bb.edn/deps.edn pointing at the sibling
-  etzhayyim/root checkout) and calls `eg/gate` on every proposed
-  invitational text. This closes ADR-2607061700 Open Question 4."
-  (:require [etzhayyim-organism.sensors.evangelism-gate :as eg]))
+  requires the evangelism gate directly and calls `eg/gate` on every proposed
+  invitational text. This closes ADR-2607061700 Open Question 4.
+
+  The sensor used to live at etzhayyim-organism.sensors.evangelism-gate in
+  etzhayyim/root's 20-actors/etzhayyim-organism. On 2026-07-18 that tree was
+  drained (etzhayyim/root 6ad7cd5) and its generic cljc organism sensors moved
+  to kotoba-lang/kotodama, per the MOVED.edn tombstone that commit left behind.
+  Nothing here followed, so the old symbol had been unresolvable — and nothing
+  said so, because the only task that would have loaded this namespace was a
+  registry entry shelling out to the retired `bb` binary. Repointed in
+  ADR-2608135000; the API (`gate`, `reason`) is unchanged."
+  (:require [kotodama.organism.sensors.evangelism-gate :as eg]))
 
 (defn check
   "Censors a tomoshibi invitational-content proposal. proposal is

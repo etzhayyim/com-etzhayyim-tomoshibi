@@ -3,4 +3,51 @@
         cheshire/cheshire {:mvn/version "5.13.0"}} ; test-only: lexicon-schema cross-check (bb bundles this built-in; declared here for clojure-CLI parity)
  :aliases
  {:lint {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2024.11.14"}}
-         :main-opts    ["-m" "clj-kondo.main" "--lint" "src" "test" "scripts" "--fail-level" "error"]}}}
+         :main-opts    ["-m" "clj-kondo.main" "--lint" "src" "test" "scripts" "--fail-level" "error"]}
+
+  ;; ---------------------------------------------------------------------------------------------
+  ;; :siblings — everything tomoshibi's OWN namespaces need in order to load at all. Composed by
+  ;; both :test and :daemon (`-M:siblings:test`), rather than duplicated into each, because the two
+  ;; drifting apart is how you get a suite that passes while the daemon cannot start.
+  ;;
+  ;; None of this was declared anywhere before ADR-2608135000, because the only tasks that would
+  ;; have loaded these namespaces were registry entries shelling out to `bb` — and bb.edn, which had
+  ;; carried the classpath, was deleted when babashka was retired (ADR-2607173000). A dependency
+  ;; nothing can load is not reported by anything; it is simply never reached.
+  ;;
+  ;;   kotodama/src        tomoshibi.governor requires the evangelism gate. It used to be
+  ;;                       etzhayyim-organism.sensors.evangelism-gate under
+  ;;                       ../root/20-actors/etzhayyim-organism/src; etzhayyim/root drained that
+  ;;                       tree on 2026-07-18 (6ad7cd5) and its MOVED.edn tombstone names
+  ;;                       kotoba-lang/kotodama as the destination for the generic cljc organism
+  ;;                       sensors. An :extra-path, not a :local/root dep: the two files needed
+  ;;                       (evangelism-gate and the charter-rider it delegates to) are
+  ;;                       dependency-free .cljc, while kotodama's own deps.edn pulls langgraph —
+  ;;                       no reason to resolve a StateGraph runtime for an offline text scanner.
+  ;;   root/70-tools/src   tomoshibi.kotoba-store requires etzhayyim.kotoba.engine and its
+  ;;                       etzhayyim.kotoba.{datom,log,query,schema,encrypted,cid} family.
+  ;;   mail / mailer       tomoshibi.mail requires mail.inbound, mail.message, mailer.core.
+  ;;                       :local/root because both ship `resources` beside `src`; mail is named
+  ;;                       here as well as transitively so the sibling checkout wins over mailer's
+  ;;                       git pin, and one `west update` moves both together.
+  ;;   langgraph           tomoshibi.graph requires langgraph.graph.
+  ;;
+  ;; All paths are west's own layout: orgs/etzhayyim/com-etzhayyim-tomoshibi with
+  ;; orgs/etzhayyim/root and orgs/kotoba-lang/* beside it.
+  :siblings {:extra-paths ["../../kotoba-lang/kotodama/src" "../root/70-tools/src"]
+             :extra-deps  {io.github.kotoba-lang/mail      {:local/root "../../kotoba-lang/mail"}
+                           io.github.kotoba-lang/mailer    {:local/root "../../kotoba-lang/mailer"}
+                           io.github.kotoba-lang/langgraph {:local/root "../../kotoba-lang/langgraph"}}}
+
+  ;; `nbb scripts/run-task.cljs test` -> clojure -M:siblings:test
+  :test {:extra-paths ["test"]
+         :main-opts   ["run_tests.clj"]}
+
+  ;; `nbb scripts/run-task.cljs agent` / `agent:once` -> clojure -M:siblings:daemon
+  ;; babashka bundles http-client, process and cheshire, so tomoshibi.daemon required all three
+  ;; without any of them being declared — invisible dependencies rather than absent ones. Each is
+  ;; an ordinary maven artifact.
+  :daemon {:extra-deps {org.babashka/http-client {:mvn/version "0.4.22"}
+                        babashka/process         {:mvn/version "0.5.22"}
+                        http-kit/http-kit        {:mvn/version "2.8.0"}}
+           :main-opts  ["-m" "tomoshibi.daemon"]}}}
