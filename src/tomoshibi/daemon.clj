@@ -28,7 +28,7 @@
     TOMOSHIBI_HEALTHZ_PORT  default 13094"
   (:require [babashka.http-client :as http]
             [babashka.process :as p]
-            [cheshire.core :as json]
+            [json.compat :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [org.httpkit.server :as srv]
@@ -61,10 +61,10 @@
     (let [resp (http/request
                 (cond-> {:method method :uri url :headers (or headers {})
                          :timeout timeout-ms :throw false}
-                  json (-> (assoc :body (cheshire.core/generate-string json))
+                  json (-> (assoc :body (json.compat/generate-string json))
                            (assoc-in [:headers "Content-Type"] "application/json"))))]
       {:status (:status resp)
-       :body (try (cheshire.core/parse-string (:body resp) true)
+       :body (try (json.compat/parse-string (:body resp) true)
                   (catch Exception _ nil))})
     (catch Exception e
       {:status nil :error (ex-message e)})))

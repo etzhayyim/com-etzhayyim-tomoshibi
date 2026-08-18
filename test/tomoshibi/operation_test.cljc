@@ -4,7 +4,7 @@
 ;; Run via run_tests.clj (bb run_tests.clj) — this ns has no standalone
 ;; -main; it is aggregated by the shared runner (kouhou/tashikame convention).
 (ns tomoshibi.operation-test
-  (:require [cheshire.core :as json]
+  (:require [json.compat :as json]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is testing]]
             [tomoshibi.operation :as op]
