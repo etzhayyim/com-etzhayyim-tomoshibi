@@ -10,7 +10,7 @@
 
   Run: clojure -M -m cacao-smoke"
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [tomoshibi.cacao :as cacao]))
 
 (defn- fail! [msg] (println "FAIL:" msg) (System/exit 1))

@@ -20,7 +20,7 @@
   All I/O is via injected read-file/append-line fns so every fold here is
   pure/testable; tomoshibi.agent binds them to real files."
   (:require [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [tomoshibi.store :as store]))
 
 (defn- edn-lines [content]

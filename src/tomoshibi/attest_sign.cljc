@@ -14,7 +14,7 @@
 
   Pure builders here; the JVM subprocess boundary (scripts/sign_head.clj) and
   file I/O live in tomoshibi.daemon."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defn sha256-hex
   "Lowercase hex sha256 of a UTF-8 string."

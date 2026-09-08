@@ -32,7 +32,7 @@
   (owner machine, member key at ~/.etzhayyim/member/ — never on the fleet
   node, never in the repo)."
   (:require [clojure.edn :as edn]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 (defn canonical-message
   "The exact string the member signs. Deterministic from the leash fields —
