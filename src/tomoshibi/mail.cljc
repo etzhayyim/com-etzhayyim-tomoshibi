@@ -21,7 +21,7 @@
                kotoba-lang mailer.core's :resend request, augmented with the
                RFC headers mailer.core does not emit (In-Reply-To /
                References / List-Unsubscribe / Auto-Submitted)."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [mail.inbound :as inbound]
             [mail.message :as message]
             [mailer.core :as mailer]))
@@ -114,10 +114,10 @@
   bulk/junk/list, and the mailer-daemon/no-reply sender conventions."
   [inb]
   (let [m (:mail.inbound/message inb)
-        headers (into {} (map (fn [[k v]] [(str/lower-case (name k)) (str v)])
+        headers (into {} (map (fn [[k v]] [(str/lower (name k)) (str v)])
                               (:mail/headers m)))
-        auto-submitted (str/lower-case (get headers "auto-submitted" "no"))
-        precedence (str/lower-case (get headers "precedence" ""))
+        auto-submitted (str/lower (get headers "auto-submitted" "no"))
+        precedence (str/lower (get headers "precedence" ""))
         machine-addr? #(re-find #"(?i)^(mailer-daemon|postmaster|no-?reply|bounce)[@+.-]" (str %))]
     (boolean
      (or (not= auto-submitted "no")

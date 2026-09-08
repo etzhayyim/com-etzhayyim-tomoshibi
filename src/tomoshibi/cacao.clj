@@ -23,7 +23,7 @@
   this corpus's convention either (kouhou/tashikame ship no cacao_test —
   verified instead by a manual smoke script, see `scripts/cacao_smoke.clj`)."
   (:require [clojure.edn :as edn]
-            [clojure.string :as str])
+            [kotoba.lang.text :as str])
   (:import [java.security KeyPairGenerator MessageDigest Signature KeyFactory]
            [java.security.spec PKCS8EncodedKeySpec X509EncodedKeySpec]
            [java.io ByteArrayOutputStream]

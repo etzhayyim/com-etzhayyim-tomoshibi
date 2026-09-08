@@ -14,7 +14,7 @@
   File format: EDN lines (one map per line), append-only — an audit trail of
   when/why an address was suppressed, mirroring the corpus's journal ethos."
   (:require [clojure.edn :as edn]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 (def stop-patterns
   "A stop request in either doctrine language. Deliberately generous — a false
@@ -38,7 +38,7 @@
     (boolean (some #(re-find % s) stop-patterns))))
 
 (defn- normalize [email]
-  (some-> email str/trim str/lower-case not-empty))
+  (some-> email str/trim str/lower not-empty))
 
 (defn load-suppressed
   "Read the suppression journal → set of lowercased addresses. `read-file` is

@@ -1,7 +1,7 @@
 (ns tomoshibi.agent-test
   "Offline behavioral suite for one resident tick — every effect mocked, the
   REAL governor/evangelism-gate in the loop (same wiring as production)."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [tomoshibi.agent :as agent]
             [tomoshibi.journal :as journal]

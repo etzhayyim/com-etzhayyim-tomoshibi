@@ -15,7 +15,7 @@
   template fallback, because a canned reply to a personal inquiry would be
   worse than silence (contrast: the organism's narration fail-open template,
   where the audience is a public log, not a correspondent)."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (def allowed-infer-hosts
   "Murakumo-only inference endpoints (kouhou.advisor precedent + the
