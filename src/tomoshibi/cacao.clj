@@ -23,11 +23,9 @@
   this corpus's convention either (kouhou/tashikame ship no cacao_test —
   verified instead by a manual smoke script, see `scripts/cacao_smoke.clj`)."
   (:require [clojure.edn :as edn]
-            [clojure.string :as str])
-  (:import [java.security KeyPairGenerator MessageDigest Signature KeyFactory]
-           [java.security.spec PKCS8EncodedKeySpec X509EncodedKeySpec]
-           [java.io ByteArrayOutputStream]
-           [java.util Base64]))
+            [clojure.string :as str]
+            [kotoba.security :as ksec]
+            [kotoba.util :as kutil])
 
 (def ^:private cap->op {:cap/read "datom:read" :cap/transact "datom:transact" :cap/admin "tx:create"})
 
@@ -64,7 +62,7 @@
          (:statement payload) (assoc "statement" (:statement payload)))
    "s" {"t" "EdDSA" "s" (or sig-b64 "")}})
 
-(defn- cbor-head [^ByteArrayOutputStream o major n]
+(defn- cbor-head [^bytes o major n]
   (cond (< n 24)    (.write o (int (+ (bit-shift-left major 5) n)))
         (< n 256)   (do (.write o (int (+ (bit-shift-left major 5) 24))) (.write o (int n)))
         (< n 65536) (do (.write o (int (+ (bit-shift-left major 5) 25)))
@@ -107,7 +105,7 @@
 (def ^:private b32 "abcdefghijklmnopqrstuvwxyz234567")
 
 (defn- sha256 ^bytes [^bytes data]
-  (.digest (MessageDigest/getInstance "SHA-256") data))
+  (ksec/sha256-bytes data))
 
 (defn- base32-lower-no-pad
   "CIDv1 base32-lower, no padding (multibase 'b' payload) — 8-bit input drained
@@ -155,20 +153,20 @@
 (defn generate-identity
   "A fresh Ed25519 identity {:private-key :public-key :did :graph}."
   []
-  (let [kp (.generateKeyPair (KeyPairGenerator/getInstance "Ed25519"))
-        pub (.getPublic kp)
+  (let [kp (ksec/generate-keypair "Ed25519")
+        pub (ksec/get-public kp)
         did (did-key pub)]
-    {:private-key (.getPrivate kp) :public-key pub :did did
+    {:private-key (ksec/get-private kp) :public-key pub :did did
      :graph (canonical-graph did default-db-name)
-     :private-b64 (.encodeToString (Base64/getEncoder) (.getEncoded (.getPrivate kp)))
-     :public-b64  (.encodeToString (Base64/getEncoder) (.getEncoded pub))}))
+     :private-b64 (kutil/base64-encode (ksec/get-encoded (ksec/get-private kp)))
+     :public-b64  (kutil/base64-encode (ksec/get-encoded pub))}))
 
 (defn load-identity
   "Reload a persisted identity from base64 PKCS8 private + X.509 public."
   [{:keys [private-b64 public-b64]}]
-  (let [kf (KeyFactory/getInstance "Ed25519")
-        priv (.generatePrivate kf (PKCS8EncodedKeySpec. (.decode (Base64/getDecoder) private-b64)))
-        pub  (.generatePublic kf (X509EncodedKeySpec. (.decode (Base64/getDecoder) public-b64)))
+  (let [kf (ksec/keyfactory "Ed25519")
+        priv (ksec/generate-private kf (ksec/pkcs8-spec (kutil/base64-decode private-b64)))
+        pub  (ksec/generate-public kf (ksec/x509-spec (kutil/base64-decode public-b64)))
         did  (did-key pub)]
     {:private-key priv :public-key pub :did did
      :graph (canonical-graph did default-db-name)
@@ -178,7 +176,7 @@
   "Per-actor key: load tomoshibi's persisted Ed25519 identity at `path`, or
   generate + persist one on first run (only the b64 key material is stored)."
   [path]
-  (let [f (java.io.File. ^String path)]
+  (let [f (kutil/file path)]
     (if (.exists f)
       (load-identity (edn/read-string (slurp f)))
       (let [id (generate-identity)
@@ -202,7 +200,7 @@
   (let [payload (grant->payload grant {:iss did :aud aud :nonce nonce
                                        :issued-at issued-at :expiry expiry})
         msg     (siwe-message payload)
-        sig     (ed-sign private-key (.getBytes ^String msg "UTF-8"))
-        sig-b64 (.encodeToString (.withoutPadding (Base64/getUrlEncoder)) sig)
+        sig     (ksec/sign private-key (.getBytes ^String msg "UTF-8"))
+        sig-b64 (kutil/base64-urlsafe-encode sig)
         wire    (->wire payload sig-b64)]
-    (.encodeToString (Base64/getEncoder) (cbor-bytes wire))))
+    (kutil/base64-encode (cbor-bytes wire))))

@@ -30,26 +30,26 @@
             [babashka.process :as p]
             [json.compat :as json]
             [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [org.httpkit.server :as srv]
             [tomoshibi.agent :as agent]
             [tomoshibi.attest-sign :as attest]
             [tomoshibi.journal :as journal]
             [tomoshibi.leash :as leash]
             [tomoshibi.mail :as mail]
-            [tomoshibi.organizer :as organizer])
-  (:import (java.time Instant)))
+            [tomoshibi.organizer :as organizer]
+            [kotoba.time :as ktime]))
+  (:gen-class))
 
 (defn- env [k default] (or (System/getenv k) default))
 
-(defn- now-iso [] (str (Instant/now)))
+(defn- now-iso [] (str (ktime/now)))
 
 (defn- read-file* [path]
-  (let [f (io/file path)]
+  (let [f (kutil/file path)]
     (when (.exists f) (slurp f))))
 
 (defn- append-line* [path line]
-  (io/make-parents path)
+  (kutil/make-parents path)
   (spit path (str line "\n") :append true))
 
 (defn- http-exec
