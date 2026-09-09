@@ -8,3 +8,6 @@
 infra/mail-worker/node_modules/
 infra/mail-worker/package-lock.json
 infra/mail-worker/.wrangler/
+
+# nbb dependency cache -- a build artifact, not source
+.nbb/
