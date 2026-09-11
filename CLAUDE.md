@@ -52,13 +52,13 @@ target-list (ADR-2606281500 rule 4).
   alias does now (ADR-2608135000), and it points somewhere else: etzhayyim/root
   drained `20-actors/etzhayyim-organism` on 2026-07-18 (`6ad7cd5`) and its
   `MOVED.edn` names `kotoba-lang/kotodama` as the new home of the generic cljc
-  organism sensors. Run tasks via `nbb scripts/run-task.cljs <task>`, never
+  organism sensors. Run tasks via `nbb scripts/run-task.cljk <task>`, never
   `bb`; the aliases carry the classpath now, and drifting them apart from each
   other is how the suite starts passing while the daemon cannot start.
 - The actor's own Ed25519 identity lives in `.tomoshibi/identity.edn`
   (gitignored) — NEVER commit a private key. Generated on first
   `tomoshibi.cacao/load-or-create-identity!` call.
-- `nbb scripts/run-task.cljs test` is the registered entrypoint for the suite,
+- `nbb scripts/run-task.cljk test` is the registered entrypoint for the suite,
   but it does not currently run — see README.md "Run tests" for the two reasons.
   (When last runnable: 18 tests / 48 assertions —
   governor + store/operation, `.cljc` only). `clojure -M -m cacao-smoke`
@@ -66,6 +66,6 @@ target-list (ADR-2606281500 rule 4).
   cacao, matching kouhou/tashikame — see MATURITY.md). No clj-kondo lint
   config yet beyond the placeholder `:lint` alias.
 - Test files (`test/tomoshibi/*_test.cljc`) do NOT call `-main`/`System/exit`
-  themselves — only `run_tests.clj` does. A per-file eager `(-main)` would
+  themselves — only `run_tests.cljk` does. A per-file eager `(-main)` would
   `System/exit` before the next namespace in a shared runner ever loads
   (hit this bug once already; kept as a note so it isn't reintroduced).

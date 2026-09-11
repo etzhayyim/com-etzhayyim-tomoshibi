@@ -1,7 +1,7 @@
 (ns tomoshibi.run-tests
-  "Test runner for com-etzhayyim-tomoshibi (new actors ship run_tests.clj, not
+  "Test runner for com-etzhayyim-tomoshibi (new actors ship run_tests.cljk, not
   .sh — per etzhayyim/root CLAUDE.md). Canonical path:
-  `bb run_tests.clj` (bb.edn wires the classpath, including the sibling
+  `bb run_tests.cljk` (bb.edn wires the classpath, including the sibling
   etzhayyim/root sensors checkout and the kotoba-lang mail/mailer libs)."
   (:require [clojure.test :refer [run-tests]]
             [tomoshibi.agent-test]

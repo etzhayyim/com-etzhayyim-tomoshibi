@@ -149,7 +149,7 @@
 (defn- leash-ok-fn
   "The member-CACAO leash check (ADR-2606111400 lineage). Pure field checks
   run on EVERY call (bb-cheap, fail-closed); the Ed25519 signature is
-  verified via scripts/verify_leash.clj (JVM) only when the file content
+  verified via scripts/verify_leash.cljk (JVM) only when the file content
   changes, verdict cached by content hash. Legacy v0 files stay active
   through the migration window (deprecation logged at boot). Helper failure
   → NOT ok (a leash must fail closed, opposite of the sigref's fail-open)."
@@ -198,7 +198,7 @@
                                            :now (now-iso)})))
       (append-line* (:ops paths)
                     (pr-str {:t :leash-legacy :at (now-iso)
-                             :note "v0 unsigned leash — mint a member-signed v1 with scripts/leash_mint.clj"})))
+                             :note "v0 unsigned leash — mint a member-signed v1 with scripts/leash_mint.cljk"})))
     {:leash-ok? (leash-ok-fn paths cfg)
      :propose-fn propose-fn
      :now-fn now-iso
@@ -229,7 +229,7 @@
                                           :json (:http/json req)})]
               (mail/parse-send-response status body)))
    ;; Sign the just-written attestation's head with the node-held did:key via
-   ;; the JVM helper (scripts/sign_head.clj — Ed25519 needs a real JDK, not
+   ;; the JVM helper (scripts/sign_head.cljk — Ed25519 needs a real JDK, not
    ;; bb's SCI). Runs once per committed send (≤ daily budget), so subprocess
    ;; startup is irrelevant. Fail-open on SIGNING only: helper down → an
    ;; explicit unsigned sigref (:sig nil) + :sign-failed ops line; the reply

@@ -16,7 +16,7 @@
     every tick (bb, pure — this ns): file exists/parses, :v 1, :aud matches
       the actor, :by matches the PINNED issuer (config, not the file), not
       expired, and :sig present.
-    on content change (JVM helper scripts/verify_leash.clj, cached by the
+    on content change (JVM helper scripts/verify_leash.cljk, cached by the
       daemon): the Ed25519 signature actually verifies against the did:key in
       :by. bb cannot do Ed25519 (same constraint as cacao.clj) — the split
       keeps per-tick cost trivial while making a forged/tampered leash
@@ -28,7 +28,7 @@
   still honored during migration but reported :legacy so the daemon can log
   the deprecation.
 
-  Signing/minting lives OFF-node with the member: scripts/leash_mint.clj
+  Signing/minting lives OFF-node with the member: scripts/leash_mint.cljk
   (owner machine, member key at ~/.etzhayyim/member/ — never on the fleet
   node, never in the repo)."
   (:require [clojure.edn :as edn]
@@ -95,7 +95,7 @@
 
 (defn leash-line
   "Canonical content for a LEGACY ACTIVE leash file (v0, deprecated —
-  bootstrap/testing only; mint a signed v1 with scripts/leash_mint.clj)."
+  bootstrap/testing only; mint a signed v1 with scripts/leash_mint.cljk)."
   [granted-by now]
   (pr-str {:status "active" :granted-by granted-by :at now
            :revoke "set :status to \"revoked\" (or delete this file) — the agent checks every tick, fail-closed"}))

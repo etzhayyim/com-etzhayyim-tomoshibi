@@ -1,7 +1,7 @@
 ;; The attestation-writing contract as executable tests. Invariant: only a
 ;; COMMITTED (EvangelismGovernor `:ok? true`) proposal ever produces an
 ;; evangelismActivityAttestation; a HELD proposal never does.
-;; Run via run_tests.clj (bb run_tests.clj) — this ns has no standalone
+;; Run via run_tests.cljk (bb run_tests.cljk) — this ns has no standalone
 ;; -main; it is aggregated by the shared runner (kouhou/tashikame convention).
 (ns tomoshibi.operation-test
   (:require [json.compat :as json]

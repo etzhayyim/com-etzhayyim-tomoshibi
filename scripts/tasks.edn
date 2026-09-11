@@ -1,4 +1,4 @@
-;; Task registry for `nbb scripts/run-task.cljs <task> [args…]` (ADR-2607173000).
+;; Task registry for `nbb scripts/run-task.cljk <task> [args…]` (ADR-2607173000).
 ;;
 ;; All three entries used to read ["bb" …] while bb.edn — which had supplied bb's classpath — was
 ;; already deleted, so every one of them died on "Could not locate tomoshibi/agent_test…". Converted
@@ -13,4 +13,4 @@
 
  :test
  {:cmd ["clojure" "-M:siblings:test"]
-  :doc "Run the full offline test suite (run_tests.clj). Needs the west siblings orgs/kotoba-lang/{kotodama,mail,mailer,langgraph} and orgs/etzhayyim/root, wired by the :test alias."}}
+  :doc "Run the full offline test suite (run_tests.cljk). Needs the west siblings orgs/kotoba-lang/{kotodama,mail,mailer,langgraph} and orgs/etzhayyim/root, wired by the :test alias."}}

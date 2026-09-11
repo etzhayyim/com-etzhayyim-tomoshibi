@@ -52,7 +52,7 @@ sender ── SMTP ──▶ Cloudflare Email Routing (MX, live since 2026-05-19
 
 ### The pipeline can only make the actor QUIETER
 
-Per inbound message (src/tomoshibi/agent.cljc): leash → dedup →
+Per inbound message (src/tomoshibi/agent.cljk): leash → dedup →
 auto-generated? (RFC 3834 loop guard) → stop-request? (suppress forever) →
 suppressed? → bounded retries → Murakumo draft (fail-closed, no template
 fallback) → daily send budget (default 20) → **governor on the full outgoing
@@ -126,7 +126,7 @@ speech-act.
 
 ## Consequences
 
-- 43 tests / 164 assertions green (`bb run_tests.clj`), including: HELD
+- 43 tests / 164 assertions green (`bb run_tests.cljk`), including: HELD
   drafts are never sent and never attested; stop requests suppress forever;
   auto-generated mail is never answered; budget halts the tick; send failure
   leaves no attestation; leash revocation stops everything.

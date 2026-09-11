@@ -2,7 +2,7 @@
 ;; Invariant: tomoshibi NEVER publishes an invitation the EvangelismGovernor
 ;; rejects; every published invitation is aggregate-first, opt-out-able,
 ;; non-coercive, and never solicits a minor alone (ADR-2607061700 §1.16).
-;; Run via run_tests.clj (bb run_tests.clj) — this ns has no standalone
+;; Run via run_tests.cljk (bb run_tests.cljk) — this ns has no standalone
 ;; -main; it is aggregated by the shared runner (kouhou/tashikame convention).
 (ns tomoshibi.governor-test
   (:require [clojure.test :refer [deftest is testing]]

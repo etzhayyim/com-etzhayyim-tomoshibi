@@ -33,7 +33,7 @@ human Adherent's own practice, never an actor's).
 
 Unlike kouhou/tashikame/yomi (which pair an organizer/advisor LLM node
 with a governor inside a full `langgraph.graph` StateGraph), tomoshibi R0
-ships **only** `src/tomoshibi/governor.cljc` — a pure function, no
+ships **only** `src/tomoshibi/governor.cljk` — a pure function, no
 StateGraph, no LLM node, no publisher, no deploy. This mirrors an existing
 pattern in this corpus (e.g. kataribe's R0: cells path-reserved but not
 runtime-wired) rather than inventing a new one.
