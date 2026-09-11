@@ -40,7 +40,7 @@ sender ── SMTP ──▶ Cloudflare Email Routing (MX, live since 2026-05-19
                        │ HTTPS pull (TOMOSHIBI_PULL_TOKEN)
               resident agent on murakumo node zebulun
                  launchd LaunchDaemon com.etzhayyim.tomoshibi.agent
-                 bb -m tomoshibi.daemon  (tick every 5 min, healthz :13094)
+                 kbb -m tomoshibi.daemon  (tick every 5 min, healthz :13094)
                  draft: node-local Ollama gemma4:12b-it-qat (Murakumo-only
                         allowlist, kouhou precedent)
                  gate:  tomoshibi.governor → evangelism-gate (+ charter-rider)
@@ -99,7 +99,7 @@ unaffected — sending an invitation email moves no funds, grants no access.
   loop with its own healthz, like the organism, and deliberately does
   external I/O, which the lite_runner `fire` contract forbids.
 - Registered in root fleet.edn (zebulun `:cells` + catalog) and cells.edn
-  (`lan-api` kind, healthz 13094) so `bb fleet:probe` verifies residency.
+  (`lan-api` kind, healthz 13094) so `kbb -M:fleet:probe` verifies residency.
 - Node layout mirrors the west superproject
   (`~/tomoshibi/orgs/{etzhayyim/{root,com-etzhayyim-tomoshibi},kotoba-lang/{mail,mailer}}`)
   so bb.edn's relative classpath works unchanged.
@@ -126,7 +126,7 @@ speech-act.
 
 ## Consequences
 
-- 43 tests / 164 assertions green (`bb run_tests.cljk`), including: HELD
+- 43 tests / 164 assertions green (`kbb run_tests.cljk`), including: HELD
   drafts are never sent and never attested; stop requests suppress forever;
   auto-generated mail is never answered; budget halts the tick; send failure
   leaves no attestation; leash revocation stops everything.

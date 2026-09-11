@@ -12,7 +12,7 @@ honest framing: できていないことは「未」と明記する。
 R0-illustrative marker placeholder like `tashikame.governor`/`kouhou.governor`'s
 denylists — this is the real sensor, imported via `bb.edn`'s extra classpath
 entry `../root/20-actors/etzhayyim-organism/src`). 9 tests / 19 assertions
-green (`bb run_tests.cljk`): clean-invitation-with-opt-out-flag commits,
+green (`kbb run_tests.cljk`): clean-invitation-with-opt-out-flag commits,
 clean-invitation-with-textual-opt-out commits, missing-opt-out held,
 individual-vulnerability-targeting held, coercion held,
 minor-solo-solicitation held, delegated-charter_rider-hit held,
@@ -29,7 +29,7 @@ shipped independently: the governor's decision and the
 produces an attestation — a HELD one never does (writing e.g.
 `coercionAttested: false` for gate-flagged coercive content would be a
 false attestation). 9 new tests / 29 new assertions (18 tests / 48
-assertions total, `bb run_tests.cljk`), including two that read the
+assertions total, `kbb run_tests.cljk`), including two that read the
 **actual** lexicon JSON file (via `cheshire.core`, not a hand-copied list)
 and assert `tomoshibi.store/lexicon-required-fields` and the four
 STRUCTURAL const values match it exactly — schema drift between the
@@ -54,7 +54,7 @@ byte-identically thereafter. `mint` produces a depth-1 self-minted CACAO
 (SIWE/EIP-4361 message, Ed25519-signed, minimal-CBOR-wire-encoded,
 base64). No automated `clojure.test` suite for this module — matching the
 kouhou/tashikame precedent (neither ships a `cacao_test.clj` either);
-verified instead by `scripts/cacao_smoke.cljk` (`clojure -M -m cacao-smoke`),
+verified instead by `scripts/cacao_smoke.cljk` (`kbb -M -m cacao-smoke`),
 which checks: a well-formed `did:key:z...`, byte-identical reload, a
 non-empty minted CACAO, `verify?` accepting the actor's own signature, and
 — the negative case — `verify?` rejecting that same signature under a
@@ -126,7 +126,7 @@ Infra (live): Email Routing rule `tomoshibi@etzhayyim.com → tomoshibi-mail`
 etzhayyim.com(4f4d2bc2…、ap-northeast-1)· DNS 追加4件(resend._domainkey
 TXT / send MX+TXT / _dmarc TXT)。residency: zebulun 上の LaunchDaemon
 `com.etzhayyim.tomoshibi.agent`(root fleet.edn / cells.edn 登録、
-`bb fleet:probe` で検証可能)。
+`kbb -M:fleet:probe` で検証可能)。
 
 Tests: 43 tests / 164 assertions green(R0 の 18/48 から拡張)— HELD は送信も
 attest もされない / stop-request は永続 suppression / auto-generated mail
@@ -181,7 +181,7 @@ attestation 台帳の row は lexicon 形のまま一切触れず、**並行 app
 (etzhayyim.kotoba-rad/sigref-datom 前例)で署名を積む: 1 committed attestation
 = 1 sigref、`:head` = attestation 行(pr-str)の sha256、`:sig` = node 保持
 did:key(z6MkvqXd…)の Ed25519 署名 hex。署名は JVM helper
-`scripts/sign_head.cljk`(clojure -M -m sign-head <head>)を send 成功時のみ
+`scripts/sign_head.cljk`(kbb -M -m sign-head <head>)を send 成功時のみ
 subprocess 起動(日次 budget ≤20 なので起動コストは無視可)。**fail-open は
 署名のみ** — helper 不調時は `:sig nil` の unsigned sigref + `:sign-failed`
 ops 行を明示的に残し、返信と attestation 本体は決してブロックしない
@@ -298,7 +298,7 @@ require していたが、どこにも宣言が無かった — **babashka が�
 `:siblings` alias を作り `:test` / `:daemon` の両方が合成する形にした(重複させると
 「suite は green だが daemon は起動しない」がいずれ発生する)。
 
-実測(2026-08-13): `nbb scripts/run-task.cljk test` → **58 tests / 228 assertions,
+実測(2026-08-13): `kbb --backend sci scripts/run-task.cljk test` → **58 tests / 228 assertions,
 0 failures**(前 iteration と同値 — 退行なし)。`agent:once` → 実 tick が走り
 `{:leash :revoked, :outcomes []}`(leash 不在なので正しく何もしない)。`agent` →
 resident 起動、loopback healthz が `{"ok":true,"cell":"TomoshibiEvangelismMailCell",

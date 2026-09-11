@@ -5,7 +5,7 @@
   first run, chmod it 600 and mirror to 1Password), NEVER on the fleet node
   and NEVER in a repo.
 
-    clojure -M -m leash-mint [days] [aud] [member-identity-path]
+    kbb -M -m leash-mint [days] [aud] [member-identity-path]
 
   Prints the leash.edn content to stdout — install it at the node's
   ~/.etzhayyim/tomoshibi/leash.edn. Renewal = run again (dead-man: an

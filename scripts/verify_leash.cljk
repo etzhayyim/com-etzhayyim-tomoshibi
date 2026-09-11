@@ -4,7 +4,7 @@
   the bb daemon ONLY when the leash file's content changes (result cached),
   so per-tick cost stays pure-bb.
 
-    clojure -M -m verify-leash <leash-path> <expected-issuer-did> <expected-aud>
+    kbb -M -m verify-leash <leash-path> <expected-issuer-did> <expected-aud>
 
   Prints {:valid bool :reason kw}. Exit 0 on :valid true, 1 otherwise.
   did:key decoding: multibase base58btc (z…) → varint multicodec 0xED 0x01 +

@@ -31,7 +31,7 @@ git clone --depth 1 https://github.com/kotoba-lang/mail.git
 git clone --depth 1 https://github.com/kotoba-lang/mailer.git
 
 # 2. verify offline suite ON THE NODE
-cd ~/tomoshibi/orgs/etzhayyim/com-etzhayyim-tomoshibi && bb run_tests.cljk
+cd ~/tomoshibi/orgs/etzhayyim/com-etzhayyim-tomoshibi && kbb run_tests.cljk
 
 # 3. secrets (mode 600, NEVER committed) + leash
 umask 077
@@ -46,7 +46,7 @@ EOF
 
 # 4. one smoke tick, then the daemon
 set -a; . ~/.etzhayyim/tomoshibi/env; set +a
-bb -m tomoshibi.daemon --once
+kbb -m tomoshibi.daemon --once
 sed 's/@@NODE_USER@@/<node>/g' infra/launchd/com.etzhayyim.tomoshibi.agent.plist.template \
   | sudo tee /Library/LaunchDaemons/com.etzhayyim.tomoshibi.agent.plist > /dev/null
 sudo chown root:wheel /Library/LaunchDaemons/com.etzhayyim.tomoshibi.agent.plist

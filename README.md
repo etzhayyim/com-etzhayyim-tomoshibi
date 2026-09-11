@@ -100,7 +100,7 @@ No `clojure.test` suite (matching the kouhou/tashikame precedent — neither
 ships one for cacao either); verified by a manual smoke script instead:
 
 ```bash
-clojure -M -m cacao-smoke
+kbb -M -m cacao-smoke
 ```
 
 Checks a well-formed `did:key:z...`, byte-identical reload, a non-empty
@@ -110,7 +110,7 @@ minted CACAO, `verify?` accepting the actor's own signature, and
 ## Run tests
 
 ```bash
-nbb scripts/run-task.cljk test
+kbb --backend sci scripts/run-task.cljk test
 ```
 
 This runs. It did not on 2026-08-13, and the reason is worth keeping, because
@@ -157,8 +157,8 @@ The `:test` alias needs these west siblings on disk:
 ## Run the agent
 
 ```bash
-nbb scripts/run-task.cljk agent:once   # one bounded tick, then exit
-nbb scripts/run-task.cljk agent        # resident loop + loopback healthz
+kbb --backend sci scripts/run-task.cljk agent:once   # one bounded tick, then exit
+kbb --backend sci scripts/run-task.cljk agent        # resident loop + loopback healthz
 ```
 
 Both need `TOMOSHIBI_PULL_URL`, `TOMOSHIBI_PULL_TOKEN` and `RESEND_API_KEY`;
