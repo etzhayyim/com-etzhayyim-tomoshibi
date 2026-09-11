@@ -35,7 +35,7 @@ One-actor-one-role (per the kouhou ADR's own stated convention) meant a new,
 narrowly-scoped actor was the correct call rather than bolting evangelism
 onto a domain-mismatched host.
 
-## EvangelismGovernor (`src/tomoshibi/governor.cljc`)
+## EvangelismGovernor (`src/tomoshibi/governor.cljk`)
 
 The independent censor that earns an invitational-content proposal the right
 to publish. Mirrors `tashikame.governor` / `kouhou.governor`'s shape
@@ -63,7 +63,7 @@ NOT an external operator/Council prior restraint — it is tomoshibi's own
 seed rail; the off-switch is the revocable member CACAO leash (future work,
 see MATURITY.md), not a per-post approval.
 
-## EvangelismActivityAttestation writer (`src/tomoshibi/store.cljc` + `src/tomoshibi/operation.cljc`)
+## EvangelismActivityAttestation writer (`src/tomoshibi/store.cljk` + `src/tomoshibi/operation.cljk`)
 
 `operation/propose!` ties the governor to an append-only `Store`
 (`MemStore` for R0): only a **committed** proposal ever writes an
@@ -87,7 +87,7 @@ No LangGraph StateGraph is involved — this is a plain function pipeline,
 zero new external dependencies. See MATURITY.md for what a full
 `operation` (organizer LLM + StateGraph + publisher, mirroring kouhou) would add.
 
-## Self-sovereign identity (`src/tomoshibi/cacao.clj`)
+## Self-sovereign identity (`src/tomoshibi/cacao.cljk`)
 
 Faithful port of `kouhou.cacao` (JVM-only — `KeyPairGenerator/getInstance
 "Ed25519"` needs a real JDK crypto provider). `load-or-create-identity!`
@@ -110,7 +110,7 @@ minted CACAO, `verify?` accepting the actor's own signature, and
 ## Run tests
 
 ```bash
-nbb scripts/run-task.cljs test
+nbb scripts/run-task.cljk test
 ```
 
 This runs. It did not on 2026-08-13, and the reason is worth keeping, because
@@ -157,8 +157,8 @@ The `:test` alias needs these west siblings on disk:
 ## Run the agent
 
 ```bash
-nbb scripts/run-task.cljs agent:once   # one bounded tick, then exit
-nbb scripts/run-task.cljs agent        # resident loop + loopback healthz
+nbb scripts/run-task.cljk agent:once   # one bounded tick, then exit
+nbb scripts/run-task.cljk agent        # resident loop + loopback healthz
 ```
 
 Both need `TOMOSHIBI_PULL_URL`, `TOMOSHIBI_PULL_TOKEN` and `RESEND_API_KEY`;

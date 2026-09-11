@@ -45,11 +45,11 @@
                            io.github.kotoba-lang/mailer    {:local/root "../../kotoba-lang/mailer"}
                            io.github.kotoba-lang/langgraph {:local/root "../../kotoba-lang/langgraph"}}}
 
-  ;; `nbb scripts/run-task.cljs test` -> clojure -M:siblings:test
+  ;; `nbb scripts/run-task.cljk test` -> clojure -M:siblings:test
   :test {:extra-paths ["test"]
-         :main-opts   ["run_tests.clj"]}
+         :main-opts   ["run_tests.cljk"]}
 
-  ;; `nbb scripts/run-task.cljs agent` / `agent:once` -> clojure -M:siblings:daemon
+  ;; `nbb scripts/run-task.cljk agent` / `agent:once` -> clojure -M:siblings:daemon
   ;; babashka bundles http-client, process and cheshire, so tomoshibi.daemon required all three
   ;; without any of them being declared — invisible dependencies rather than absent ones. Each is
   ;; an ordinary maven artifact.

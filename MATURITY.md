@@ -7,12 +7,12 @@ honest framing: できていないことは「未」と明記する。
 
 ## 2026-07-06 — R0: EvangelismGovernor genuinely wired
 
-`src/tomoshibi/governor.cljc` — HARD gate calling
+`src/tomoshibi/governor.cljk` — HARD gate calling
 `etzhayyim-organism.sensors.evangelism-gate/gate` directly (not an
 R0-illustrative marker placeholder like `tashikame.governor`/`kouhou.governor`'s
 denylists — this is the real sensor, imported via `bb.edn`'s extra classpath
 entry `../root/20-actors/etzhayyim-organism/src`). 9 tests / 19 assertions
-green (`bb run_tests.clj`): clean-invitation-with-opt-out-flag commits,
+green (`bb run_tests.cljk`): clean-invitation-with-opt-out-flag commits,
 clean-invitation-with-textual-opt-out commits, missing-opt-out held,
 individual-vulnerability-targeting held, coercion held,
 minor-solo-solicitation held, delegated-charter_rider-hit held,
@@ -21,15 +21,15 @@ Open Question 4 at the governor layer.
 
 ## 2026-07-06 — R0+R1-partial: evangelismActivityAttestation writer
 
-`src/tomoshibi/store.cljc` (append-only `Store` protocol + `MemStore`) and
-`src/tomoshibi/operation.cljc` (`propose!` — governor → commit-or-hold,
+`src/tomoshibi/store.cljk` (append-only `Store` protocol + `MemStore`) and
+`src/tomoshibi/operation.cljk` (`propose!` — governor → commit-or-hold,
 no langgraph) close the loop between the two pieces ADR-2607061700 already
 shipped independently: the governor's decision and the
 `evangelismActivityAttestation` lexicon. Only a COMMITTED proposal ever
 produces an attestation — a HELD one never does (writing e.g.
 `coercionAttested: false` for gate-flagged coercive content would be a
 false attestation). 9 new tests / 29 new assertions (18 tests / 48
-assertions total, `bb run_tests.clj`), including two that read the
+assertions total, `bb run_tests.cljk`), including two that read the
 **actual** lexicon JSON file (via `cheshire.core`, not a hand-copied list)
 and assert `tomoshibi.store/lexicon-required-fields` and the four
 STRUCTURAL const values match it exactly — schema drift between the
@@ -54,7 +54,7 @@ byte-identically thereafter. `mint` produces a depth-1 self-minted CACAO
 (SIWE/EIP-4361 message, Ed25519-signed, minimal-CBOR-wire-encoded,
 base64). No automated `clojure.test` suite for this module — matching the
 kouhou/tashikame precedent (neither ships a `cacao_test.clj` either);
-verified instead by `scripts/cacao_smoke.clj` (`clojure -M -m cacao-smoke`),
+verified instead by `scripts/cacao_smoke.cljk` (`clojure -M -m cacao-smoke`),
 which checks: a well-formed `did:key:z...`, byte-identical reload, a
 non-empty minted CACAO, `verify?` accepting the actor's own signature, and
 — the negative case — `verify?` rejecting that same signature under a
@@ -181,7 +181,7 @@ attestation 台帳の row は lexicon 形のまま一切触れず、**並行 app
 (etzhayyim.kotoba-rad/sigref-datom 前例)で署名を積む: 1 committed attestation
 = 1 sigref、`:head` = attestation 行(pr-str)の sha256、`:sig` = node 保持
 did:key(z6MkvqXd…)の Ed25519 署名 hex。署名は JVM helper
-`scripts/sign_head.clj`(clojure -M -m sign-head <head>)を send 成功時のみ
+`scripts/sign_head.cljk`(clojure -M -m sign-head <head>)を send 成功時のみ
 subprocess 起動(日次 budget ≤20 なので起動コストは無視可)。**fail-open は
 署名のみ** — helper 不調時は `:sig nil` の unsigned sigref + `:sign-failed`
 ops 行を明示的に残し、返信と attestation 本体は決してブロックしない
@@ -217,12 +217,12 @@ leash が file-flag approximation から **member 署名付き delegation** に�
 :issued-at :expiry :by <member did:key> :sig <Ed25519 hex>}`。署名対象は
 `leash/canonical-message`(フィールドから決定論的に再構築 — 埋め込み文言は
 信用しない)。検査は二層: 毎 tick の純検査(bb — aud/issuer-pin/expiry/形)+
-内容変更時のみ `scripts/verify_leash.clj`(JVM、did:key multibase→raw→X.509
+内容変更時のみ `scripts/verify_leash.cljk`(JVM、did:key multibase→raw→X.509
 復元で Ed25519 検証)を実行し content-hash でキャッシュ。**issuer は file
 でなく設定に pin**(`TOMOSHIBI_LEASH_ISSUER`)— 鍵ごと差し替えた偽 leash は
 issuer-mismatch で死ぬ。**leash は fail-closed**(helper 不調 = NOT ok —
 sigref の fail-open と対称)。revocation: file 削除(即時)/上書き/expiry
-放置(dead-man: 30日で自然失効、`scripts/leash_mint.clj` で member が更新)。
+放置(dead-man: 30日で自然失効、`scripts/leash_mint.cljk` で member が更新)。
 member 鍵は owner 機の `~/.etzhayyim/member/member.identity.edn`(600)のみ —
 node にも repo にも置かない。legacy v0 は migration 窓の間 active 扱い
 (boot 時 `:leash-legacy` 警告)。実測: valid → true / sig 改竄 → 拒否 /
@@ -298,7 +298,7 @@ require していたが、どこにも宣言が無かった — **babashka が�
 `:siblings` alias を作り `:test` / `:daemon` の両方が合成する形にした(重複させると
 「suite は green だが daemon は起動しない」がいずれ発生する)。
 
-実測(2026-08-13): `nbb scripts/run-task.cljs test` → **58 tests / 228 assertions,
+実測(2026-08-13): `nbb scripts/run-task.cljk test` → **58 tests / 228 assertions,
 0 failures**(前 iteration と同値 — 退行なし)。`agent:once` → 実 tick が走り
 `{:leash :revoked, :outcomes []}`(leash 不在なので正しく何もしない)。`agent` →
 resident 起動、loopback healthz が `{"ok":true,"cell":"TomoshibiEvangelismMailCell",

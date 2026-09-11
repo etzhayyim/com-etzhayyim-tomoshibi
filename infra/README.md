@@ -31,7 +31,7 @@ git clone --depth 1 https://github.com/kotoba-lang/mail.git
 git clone --depth 1 https://github.com/kotoba-lang/mailer.git
 
 # 2. verify offline suite ON THE NODE
-cd ~/tomoshibi/orgs/etzhayyim/com-etzhayyim-tomoshibi && bb run_tests.clj
+cd ~/tomoshibi/orgs/etzhayyim/com-etzhayyim-tomoshibi && bb run_tests.cljk
 
 # 3. secrets (mode 600, NEVER committed) + leash
 umask 077

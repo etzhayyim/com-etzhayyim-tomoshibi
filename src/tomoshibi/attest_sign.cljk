@@ -12,7 +12,7 @@
   unavailable (unsigned + warned, the kotoba-rad pilot posture; fail-open on
   SIGNING only, never on sending/attesting).
 
-  Pure builders here; the JVM subprocess boundary (scripts/sign_head.clj) and
+  Pure builders here; the JVM subprocess boundary (scripts/sign_head.cljk) and
   file I/O live in tomoshibi.daemon."
   (:require [kotoba.lang.text :as str]))
 
