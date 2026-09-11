@@ -170,7 +170,7 @@
               (let [valid? (try
                              (zero? (:exit (p/shell {:out :string :err :string
                                                      :continue true :timeout 60000}
-                                                    "clojure" "-M" "-m" "verify-leash"
+                                                    "kbb" "-M" "-m" "verify-leash"
                                                     (:leash paths)
                                                     (env "TOMOSHIBI_LEASH_ISSUER" "")
                                                     (:actor-did cfg))))
@@ -240,7 +240,7 @@
            signer (try
                     (let [{:keys [out exit]} (p/shell {:out :string :err :string
                                                        :continue true :timeout 60000}
-                                                      "clojure" "-M" "-m" "sign-head" head)]
+                                                      "kbb" "-M" "-m" "sign-head" head)]
                       (when (zero? exit)
                         (let [r (edn/read-string out)]
                           (when (attest/valid-signer? r) r))))

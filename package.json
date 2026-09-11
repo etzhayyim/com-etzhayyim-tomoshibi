@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "task": "nbb scripts/run-task.cljk",
-    "tasks": "nbb scripts/run-task.cljk",
-    "test": "nbb scripts/run-task.cljk test"
+    "task": "kbb --backend sci scripts/run-task.cljk",
+    "tasks": "kbb --backend sci scripts/run-task.cljk",
+    "test": "kbb --backend sci scripts/run-task.cljk test"
   }
 }
