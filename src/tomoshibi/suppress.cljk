@@ -13,7 +13,7 @@
 
   File format: EDN lines (one map per line), append-only — an audit trail of
   when/why an address was suppressed, mirroring the corpus's journal ethos."
-  (:require [clojure.edn :as edn]
+  (:require [kotoba.lang.edn :as edn]
             [kotoba.lang.text :as str]))
 
 (def stop-patterns

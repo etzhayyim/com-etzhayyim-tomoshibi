@@ -9,7 +9,7 @@
   Prints {:valid bool :reason kw}. Exit 0 on :valid true, 1 otherwise.
   did:key decoding: multibase base58btc (z…) → varint multicodec 0xED 0x01 +
   32 raw Ed25519 bytes → X.509 wrap (RFC 8410 prefix) → JDK KeyFactory."
-  (:require [clojure.edn :as edn]
+  (:require [kotoba.lang.edn :as edn]
             [tomoshibi.cacao :as cacao]
             [tomoshibi.leash :as leash])
   (:import (java.security KeyFactory)

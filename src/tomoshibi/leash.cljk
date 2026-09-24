@@ -31,7 +31,7 @@
   Signing/minting lives OFF-node with the member: scripts/leash_mint.cljk
   (owner machine, member key at ~/.etzhayyim/member/ — never on the fleet
   node, never in the repo)."
-  (:require [clojure.edn :as edn]
+  (:require [kotoba.lang.edn :as edn]
             [kotoba.lang.text :as str]))
 
 (defn canonical-message
