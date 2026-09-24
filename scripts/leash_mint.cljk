@@ -10,7 +10,7 @@
   Prints the leash.edn content to stdout — install it at the node's
   ~/.etzhayyim/tomoshibi/leash.edn. Renewal = run again (dead-man: an
   unrenewed leash expires on its own)."
-  (:require [tomoshibi.cacao :as cacao]
+  (:require [kotoba.bytes :as kbytes] [tomoshibi.cacao :as cacao]
             [tomoshibi.leash :as leash])
   (:import (java.time Instant Duration)))
 
@@ -28,7 +28,7 @@
            :expiry (str (.plus now (Duration/ofDays days)))
            :by (:did member)}
         sig (#'cacao/ed-sign (:private-key member)
-             (.getBytes ^String (leash/canonical-message m) "UTF-8"))]
+             (kbytes/utf8-bytes ^String (leash/canonical-message m)))]
     (binding [*out* *err*]
       (println "member did:" (:did member) " key:" path)
       (println "leash valid" days "days — install stdout at ~/.etzhayyim/tomoshibi/leash.edn"))
