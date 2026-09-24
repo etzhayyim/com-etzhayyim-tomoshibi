@@ -1,5 +1,5 @@
 (ns tomoshibi.journal-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [tomoshibi.journal :as journal]
             [tomoshibi.store :as store]))
 

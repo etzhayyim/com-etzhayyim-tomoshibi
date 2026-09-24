@@ -1,6 +1,6 @@
 (ns tomoshibi.organizer-test
   (:require [kotoba.lang.text :as str]
-            [clojure.test :refer [deftest is testing]]
+            [kotoba.test :refer [deftest is testing]]
             [tomoshibi.organizer :as organizer]))
 
 (deftest murakumo-allowlist-is-enforced

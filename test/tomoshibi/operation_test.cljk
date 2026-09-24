@@ -6,7 +6,7 @@
 (ns tomoshibi.operation-test
   (:require [json.compat :as json]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is testing]]
+            [kotoba.test :refer [deftest is testing]]
             [tomoshibi.operation :as op]
             [tomoshibi.store :as store]))
 

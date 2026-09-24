@@ -5,7 +5,7 @@
 ;; Run via run_tests.cljk (kbb run_tests.cljk) — this ns has no standalone
 ;; -main; it is aggregated by the shared runner (kouhou/tashikame convention).
 (ns tomoshibi.governor-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [tomoshibi.governor :as gov]))
 
 (defn- check [text opts]

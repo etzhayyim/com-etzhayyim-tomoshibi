@@ -1,5 +1,5 @@
 (ns tomoshibi.suppress-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [tomoshibi.suppress :as suppress]))
 
 (deftest stop-request-detection

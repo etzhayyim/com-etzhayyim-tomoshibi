@@ -1,7 +1,7 @@
 (ns tomoshibi.graph-test
   "The StateGraph is decision-equivalent to the plain propose! pipeline — the
   load-bearing property that makes it a safe orchestration swap."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [tomoshibi.graph :as graph]
             [tomoshibi.operation :as operation]
             [tomoshibi.store :as store]))
