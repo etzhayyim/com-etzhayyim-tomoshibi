@@ -3,7 +3,7 @@
   .sh — per etzhayyim/root CLAUDE.md). Canonical path:
   `kbb run_tests.cljk` (bb.edn wires the classpath, including the sibling
   etzhayyim/root sensors checkout and the kotoba-lang mail/mailer libs)."
-  (:require [clojure.test :refer [run-tests]]
+  (:require [kotoba.test :refer [run-tests]]
             [tomoshibi.agent-test]
             [tomoshibi.attest-sign-test]
             [tomoshibi.governor-test]

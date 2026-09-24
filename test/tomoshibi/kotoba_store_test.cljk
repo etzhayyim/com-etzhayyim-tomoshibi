@@ -1,7 +1,7 @@
 (ns tomoshibi.kotoba-store-test
   "KotobaStore ≡ MemStore contract (the corpus's swap-not-rewrite guarantee),
   over a real temp Datom journal via etzhayyim.kotoba.engine."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [tomoshibi.kotoba-store :as ks]
             [tomoshibi.store :as store]))
 
