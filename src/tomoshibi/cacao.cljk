@@ -22,7 +22,7 @@
   own convention (\".clj only for JVM-only I/O\"). No automated unit test in
   this corpus's convention either (kouhou/tashikame ship no cacao_test —
   verified instead by a manual smoke script, see `scripts/cacao_smoke.cljk`)."
-  (:require [clojure.edn :as edn]
+  (:require [kotoba.lang.edn :as edn]
             [kotoba.lang.text :as str])
   (:import [java.security KeyPairGenerator MessageDigest Signature KeyFactory]
            [java.security.spec PKCS8EncodedKeySpec X509EncodedKeySpec]

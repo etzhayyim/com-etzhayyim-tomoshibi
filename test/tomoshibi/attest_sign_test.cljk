@@ -1,5 +1,5 @@
 (ns tomoshibi.attest-sign-test
-  (:require [clojure.edn :as edn]
+  (:require [kotoba.lang.edn :as edn]
             [kotoba.test :refer [deftest is testing]]
             [tomoshibi.attest-sign :as attest]))
 
