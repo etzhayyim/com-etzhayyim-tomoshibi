@@ -30,7 +30,7 @@
             [babashka.process :as p]
             [json.compat :as json]
             [kotoba.lang.edn :as edn]
-            [clojure.java.io :as io]
+            [kotoba.io :as io]
             [org.httpkit.server :as srv]
             [tomoshibi.agent :as agent]
             [tomoshibi.attest-sign :as attest]
@@ -46,7 +46,7 @@
 
 (defn- read-file* [path]
   (let [f (io/file path)]
-    (when (.exists f) (slurp f))))
+    (when (io/exists? f) (slurp f))))
 
 (defn- append-line* [path line]
   (io/make-parents path)

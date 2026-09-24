@@ -9,7 +9,7 @@
        exact SIWE message bytes that were signed
 
   Run: kbb -M -m cacao-smoke"
-  (:require [clojure.java.io :as io]
+  (:require [kotoba.bytes :as kbytes] [kotoba.io :as io]
             [kotoba.lang.text :as str]
             [tomoshibi.cacao :as cacao]))
 
@@ -42,7 +42,7 @@
           ;; Re-derive the signature bytes the same way `mint` did, and confirm
           ;; verify? accepts them against the actor's own public key, and
           ;; rejects them under a different actor's public key.
-          (let [sig-source (.getBytes ^String msg "UTF-8")
+          (let [sig-source (kbytes/utf8-bytes ^String msg)
                 sign! (fn [priv]
                         (let [s (doto (java.security.Signature/getInstance "Ed25519")
                                   (.initSign priv))]

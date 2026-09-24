@@ -5,7 +5,7 @@
 ;; -main; it is aggregated by the shared runner (kouhou/tashikame convention).
 (ns tomoshibi.operation-test
   (:require [json.compat :as json]
-            [clojure.java.io :as io]
+            [kotoba.io :as io]
             [kotoba.test :refer [deftest is testing]]
             [tomoshibi.operation :as op]
             [tomoshibi.store :as store]))

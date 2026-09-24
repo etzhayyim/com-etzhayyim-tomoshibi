@@ -12,7 +12,7 @@
   Reuses tomoshibi.cacao's private ed-sign var rather than duplicating the
   Signature plumbing (cacao.clj is a keep-in-sync family port — we deliberately
   do not widen its public surface)."
-  (:require [tomoshibi.cacao :as cacao]))
+  (:require [kotoba.bytes :as kbytes] [tomoshibi.cacao :as cacao]))
 
 (defn- hex [^bytes bs] (apply str (map #(format "%02x" %) bs)))
 
@@ -22,5 +22,5 @@
           (println "usage: kbb -M -m sign-head <head> [identity-path]"))
         (System/exit 2))
     (let [id (cacao/load-or-create-identity! (or path ".tomoshibi/identity.edn"))
-          sig (#'cacao/ed-sign (:private-key id) (.getBytes ^String head "UTF-8"))]
+          sig (#'cacao/ed-sign (:private-key id) (kbytes/utf8-bytes ^String head))]
       (prn {:by (:did id) :sig (hex sig)}))))
